@@ -1,0 +1,51 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>بيانات الأستاذ</title>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">وزارة</div>
+    <div>
+      <div style="font-weight:800">منصة الأستاذ بالأقسام الخاصة</div>
+      <small>بيانات الأستاذ</small>
+    </div>
+  </div>
+  <nav>
+    <a href="index.html">تسجيل</a>
+    <a href="teacher.html">البيانات</a>
+    <a href="students.html">التلاميذ</a>
+  </nav>
+  <div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">Français</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 id="h">معلومات الأستاذ</h2>
+    <div class="grid">
+      <div><label id="lfn">الاسم</label><input id="firstName"></div>
+      <div><label id="lln">اللقب</label><input id="lastName"></div>
+      <div><label id="lsp">التخصص</label><input id="speciality"></div>
+      <div><label id="lsch">المدرسة</label><input id="school"></div>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="saveTeacher()" id="saveBtn">حفظ</button>
+    <span class="badge" id="savedBadge" style="display:none">✔ تم الحفظ</span>
+  </div>
+
+  <div class="card">
+    <h3>معاينة</h3>
+    <div id="preview"></div>
+  </div>
+</div>
+
+<footer>© وزارة التضامن الوطني</footer>
+<script src="app.js"></script>
+</body>
+</html>

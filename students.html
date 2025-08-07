@@ -1,0 +1,69 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>قائمة التلاميذ</title>
+<link href="styles.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">وزارة</div>
+    <div>
+      <div style="font-weight:800">منصة الأستاذ بالأقسام الخاصة</div>
+      <small>قائمة التلاميذ</small>
+    </div>
+  </div>
+  <nav>
+    <a href="index.html">تسجيل</a>
+    <a href="teacher.html">البيانات</a>
+    <a href="students.html">التلاميذ</a>
+  </nav>
+  <div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">Français</button>
+  </div>
+</header>
+
+<div class="container">
+  <div class="card">
+    <h2 id="sh">إدارة التلاميذ</h2>
+    <div class="grid">
+      <div><label id="sn">اسم التلميذ</label><input id="sName"></div>
+      <div><label id="sp">اسم الولي</label><input id="parentName"></div>
+      <div><label id="sa">العنوان</label><input id="address"></div>
+      <div><label id="sb">مكان الازدياد</label><input id="birthPlace"></div>
+      <div><label id="sd">تاريخ الازدياد</label><input id="birthDate" type="date"></div>
+      <div><label id="st">نوع التوحد/المرض</label><input id="type"></div>
+      <div><label id="sr">ملاحظات</label><input id="notes"></div>
+    </div>
+    <button class="btn" style="margin-top:12px" onclick="addStudent()" id="addBtn">إضافة</button>
+  </div>
+
+  <div class="card">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <h3 id="listTitle" style="margin:0">قائمة التلاميذ</h3>
+      <div>
+        <button class="btn secondary" onclick="downloadCSV()">CSV</button>
+        <button class="btn" onclick="printPDF()">طباعة PDF</button>
+      </div>
+    </div>
+    <div style="overflow:auto;margin-top:10px">
+      <table class="table" id="studentsTable">
+        <thead>
+          <tr>
+            <th>#</th><th id="thn">الاسم</th><th id="thp">الولي</th><th id="tha">العنوان</th>
+            <th id="thb">مكان/تاريخ الازدياد</th><th id="tht">النوع</th><th id="thx">ملاحظات</th><th>إجراءات</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<footer>© وزارة التضامن الوطني</footer>
+<script src="app.js"></script>
+</body>
+</html>
