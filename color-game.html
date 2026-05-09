@@ -1,0 +1,452 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Jeu des couleurs 🎨 لعبة الألوان</title>
+<style>
+  /* ===== تصميم مستقل بالكامل ===== */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fef3c7 100%);
+    min-height:100vh;color:#111;padding:20px;
+  }
+  .app{max-width:900px;margin:0 auto}
+
+  header{
+    text-align:center;padding:20px;background:#fff;border-radius:20px;
+    box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:20px;
+  }
+  header h1{font-size:28px;color:#1e40af;margin-bottom:8px}
+  header p{color:#475569;font-size:16px;line-height:1.7}
+
+  /* شريط النقاط */
+  .score-bar{
+    display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:14px;
+  }
+  .pill{
+    padding:8px 18px;border-radius:999px;font-weight:800;font-size:16px;
+    border:2px solid transparent;
+  }
+  .pill.win{background:#dcfce7;color:#166534;border-color:#bbf7d0}
+  .pill.lose{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+  .btn-reset{
+    background:#e5e7eb;border:0;padding:8px 16px;border-radius:999px;
+    font-weight:700;cursor:pointer;color:#374151;
+  }
+  .btn-reset:hover{background:#d1d5db}
+
+  /* شبكة الألوان - أسماء فقط */
+  .card{
+    background:#fff;border-radius:20px;padding:24px;
+    box-shadow:0 4px 20px rgba(0,0,0,.08);
+  }
+  .card h2{color:#1e40af;margin-bottom:16px;font-size:22px}
+
+  .colors-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:14px;
+  }
+  .color-btn{
+    padding:24px 16px;
+    border:3px dashed #9ca3af;
+    border-radius:14px;
+    background:#fafafa;
+    color:#111;
+    font-size:22px;font-weight:900;
+    cursor:pointer;
+    transition:all .2s ease;
+    font-family:"Segoe UI",Arial,sans-serif;
+    letter-spacing:.5px;
+  }
+  .color-btn:hover{
+    transform:translateY(-3px);
+    box-shadow:0 10px 20px rgba(0,0,0,.1);
+    border-color:#3b82f6;background:#fff;
+  }
+  .color-btn:active{transform:translateY(0)}
+  .color-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  /* ===== النافذة المنبثقة ===== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    display:none;align-items:center;justify-content:center;
+    z-index:100;padding:16px;animation:fadeIn .2s ease;
+  }
+  .overlay.show{display:flex}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+  .modal{
+    background:#fff;border-radius:22px;width:min(480px,100%);
+    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+    text-align:center;animation:pop .25s ease;
+  }
+  @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+
+  .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
+  .modal-head .small{color:#6b7280;font-size:14px;font-weight:700;text-align:start}
+  .current-color{font-size:36px;font-weight:900;color:#111;margin-top:4px;text-align:start}
+  .close{
+    border:0;background:#f3f4f6;width:38px;height:38px;border-radius:12px;
+    font-size:22px;cursor:pointer;color:#374151;
+  }
+  .close:hover{background:#e5e7eb}
+
+  /* دائرة المؤقّت */
+  .timer-wrap{position:relative;width:200px;height:200px;margin:18px auto}
+  .timer-svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .timer-bg{fill:none;stroke:#e5e7eb;stroke-width:10}
+  .timer-fg{
+    fill:none;stroke:#16a34a;stroke-width:10;stroke-linecap:round;
+    stroke-dasharray:339.292;stroke-dashoffset:0;
+    transition:stroke-dashoffset 1s linear,stroke .3s;
+  }
+  .timer-fg.warning{stroke:#f59e0b}
+  .timer-fg.danger{stroke:#dc2626}
+  .timer-text{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:64px;font-weight:900;color:#111;
+  }
+
+  .btn{
+    border:0;border-radius:12px;padding:14px 22px;font-size:17px;font-weight:800;
+    cursor:pointer;transition:all .15s;font-family:inherit;
+  }
+  .btn.win-btn{background:#16a34a;color:#fff}
+  .btn.win-btn:hover{background:#15803d}
+  .btn.secondary{background:#e5e7eb;color:#374151}
+  .btn.secondary:hover{background:#d1d5db}
+  .btn.bonus{background:#f59e0b;color:#fff}
+  .btn.bonus:hover{background:#d97706}
+
+  .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
+  .hidden{display:none !important}
+
+  .second-chance{
+    background:#fff7ed;border:3px solid #fed7aa;border-radius:16px;
+    padding:20px;margin-top:14px;
+  }
+  .cry{font-size:72px;line-height:1;animation:shake .6s ease infinite}
+  @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+  .second-chance p{font-weight:800;color:#9a3412;margin:10px 0 14px;font-size:17px}
+
+  .win-screen{
+    background:#f0fdf4;border:3px solid #bbf7d0;border-radius:16px;
+    padding:20px;margin-top:14px;
+  }
+  .trophy{font-size:80px;line-height:1;animation:bounce .8s ease infinite alternate}
+  @keyframes bounce{to{transform:translateY(-10px) rotate(-5deg)}}
+  .win-screen p{font-weight:800;color:#166534;font-size:22px;margin:10px 0 14px}
+
+  footer{text-align:center;color:#64748b;margin-top:20px;padding:16px;font-size:14px}
+
+  @media (max-width:480px){
+    .color-btn{font-size:18px;padding:20px 10px}
+    .timer-wrap{width:160px;height:160px}
+    .timer-text{font-size:48px}
+    header h1{font-size:22px}
+    .current-color{font-size:28px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>🎨 Jeu des couleurs — لعبة الألوان</h1>
+    <p>اضغط على اسم اللون، استمع إلى النطق بالفرنسية، ثم ابحث عن اللون في القسم خلال <strong>10 ثواني</strong>.
+       إن وجدته اضغط <strong>Vainqueur</strong> 🏆، وإلا فلديك فرصة أخيرة بـ <strong>10 ثواني</strong> إضافية.</p>
+    <div class="score-bar">
+      <span class="pill win">🏆 <span id="scoreWin">0</span></span>
+      <span class="pill lose">😢 <span id="scoreLose">0</span></span>
+      <button class="btn-reset" onclick="resetScore()">إعادة العدّ</button>
+    </div>
+  </header>
+
+  <div class="card">
+    <h2>اختر كلمة لون:</h2>
+    <div class="colors-grid" id="colorsGrid"></div>
+  </div>
+
+  <footer>© لعبة تعليمية — Jeu éducatif</footer>
+</div>
+
+<!-- النافذة المنبثقة -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="small">ابحث عن اللون:</div>
+        <div class="current-color" id="currentColor">—</div>
+      </div>
+      <button class="close" onclick="closeGame()">×</button>
+    </div>
+
+    <div class="timer-wrap">
+      <svg viewBox="0 0 120 120" class="timer-svg">
+        <circle cx="60" cy="60" r="54" class="timer-bg"></circle>
+        <circle cx="60" cy="60" r="54" class="timer-fg" id="timerFg"></circle>
+      </svg>
+      <div class="timer-text" id="timerText">10</div>
+    </div>
+
+    <div class="modal-actions" id="mainActions">
+      <button class="btn win-btn" onclick="declareWin()">🏆 Vainqueur</button>
+      <button class="btn secondary" onclick="speakCurrent()">🔊 Répéter</button>
+    </div>
+
+    <div class="second-chance hidden" id="secondChance">
+      <div class="cry">😢</div>
+      <p>انتهى الوقت! هل تريد <strong>10 ثواني</strong> إضافية؟</p>
+      <div class="modal-actions">
+        <button class="btn bonus" onclick="giveBonusTime()">⏱️ +10 ثواني</button>
+        <button class="btn secondary" onclick="closeGame()">استسلام</button>
+      </div>
+    </div>
+
+    <div class="win-screen hidden" id="winScreen">
+      <div class="trophy">🏆</div>
+      <p>Bravo ! أحسنت!</p>
+      <button class="btn win-btn" onclick="closeGame()">متابعة</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ============= قائمة الألوان =============
+  const COLORS = [
+    "Rouge","Bleu","Jaune","Vert","Orange","Violet",
+    "Rose","Noir","Blanc","Marron","Gris","Bleu ciel"
+  ];
+
+  const state = {
+    current:null,timeLeft:10,timer:null,
+    bonusGiven:false,inGame:false,
+    score:{win:0,lose:0}
+  };
+
+  // ============= الأصوات (بدون ملفات خارجية) =============
+  let audioCtx = null;
+  function ac(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tone(freq,duration=0.2,type="sine",gain=0.2,when=0){
+    const ctx=ac();
+    const osc=ctx.createOscillator();
+    const g=ctx.createGain();
+    osc.type=type;osc.frequency.value=freq;
+    g.gain.value=gain;
+    osc.connect(g).connect(ctx.destination);
+    const t=ctx.currentTime+when;
+    osc.start(t);
+    g.gain.setValueAtTime(gain,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+duration);
+    osc.stop(t+duration+0.02);
+  }
+
+  // صوت الفوز: لحن صاعد + تصفيق
+  function playWinSound(){
+    const notes=[523.25,659.25,783.99,1046.5];
+    notes.forEach((f,i)=>tone(f,0.18,"triangle",0.25,i*0.15));
+    setTimeout(()=>clapBurst(6),700);
+  }
+
+  function clapBurst(count=5){
+    const ctx=ac();
+    for(let i=0;i<count;i++){
+      setTimeout(()=>{
+        const bs=ctx.sampleRate*0.08;
+        const buf=ctx.createBuffer(1,bs,ctx.sampleRate);
+        const data=buf.getChannelData(0);
+        for(let j=0;j<bs;j++) data[j]=(Math.random()*2-1)*(1-j/bs);
+        const src=ctx.createBufferSource();src.buffer=buf;
+        const g=ctx.createGain();g.gain.value=0.35;
+        const fl=ctx.createBiquadFilter();
+        fl.type="bandpass";fl.frequency.value=2000;
+        src.connect(fl).connect(g).connect(ctx.destination);
+        src.start();
+      },i*110);
+    }
+  }
+
+  // صوت البكاء
+  function playCrySound(){
+    const ctx=ac();
+    const osc=ctx.createOscillator();
+    const g=ctx.createGain();
+    const lfo=ctx.createOscillator();
+    const lfoGain=ctx.createGain();
+    osc.type="sine";osc.frequency.value=420;
+    lfo.frequency.value=5;lfoGain.gain.value=60;
+    lfo.connect(lfoGain).connect(osc.frequency);
+    g.gain.value=0.3;
+    osc.connect(g).connect(ctx.destination);
+    const t=ctx.currentTime;
+    osc.start(t);lfo.start(t);
+    osc.frequency.setValueAtTime(500,t);
+    osc.frequency.linearRampToValueAtTime(220,t+1.4);
+    g.gain.setValueAtTime(0.35,t);
+    g.gain.exponentialRampToValueAtTime(0.0001,t+1.6);
+    osc.stop(t+1.7);lfo.stop(t+1.7);
+  }
+
+  function tickSound(){tone(900,0.05,"square",0.1)}
+
+  // نطق بالفرنسية
+  function speakFrench(text){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(text);
+      u.lang="fr-FR";u.rate=0.9;u.pitch=1.05;
+      const voices=window.speechSynthesis.getVoices();
+      const fr=voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"));
+      if(fr) u.voice=fr;
+      window.speechSynthesis.speak(u);
+    }catch(e){console.warn(e)}
+  }
+
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged=()=>{};
+  }
+
+  // ============= بناء الشبكة =============
+  function buildGrid(){
+    const grid=document.getElementById("colorsGrid");
+    grid.innerHTML="";
+    const shuffled=[...COLORS].sort(()=>Math.random()-0.5);
+    shuffled.forEach(name=>{
+      const btn=document.createElement("button");
+      btn.className="color-btn";
+      btn.textContent=name;
+      btn.addEventListener("click",()=>startChallenge(name));
+      grid.appendChild(btn);
+    });
+  }
+
+  // ============= التحدي =============
+  function startChallenge(colorName){
+    if(state.inGame) return;
+    ac(); // تفعيل السياق الصوتي
+    state.inGame=true;
+    state.current=colorName;
+    state.bonusGiven=false;
+
+    document.getElementById("currentColor").textContent=colorName;
+    document.getElementById("overlay").classList.add("show");
+    document.getElementById("secondChance").classList.add("hidden");
+    document.getElementById("winScreen").classList.add("hidden");
+    document.getElementById("mainActions").classList.remove("hidden");
+
+    speakFrench(colorName);
+    setTimeout(()=>startTimer(10),400);
+  }
+
+  function startTimer(seconds){
+    clearInterval(state.timer);
+    state.timeLeft=seconds;
+    updateTimerUI(seconds,seconds);
+    state.timer=setInterval(()=>{
+      state.timeLeft--;
+      updateTimerUI(state.timeLeft,seconds);
+      if(state.timeLeft<=3&&state.timeLeft>0) tickSound();
+      if(state.timeLeft<=0){
+        clearInterval(state.timer);
+        onTimeUp();
+      }
+    },1000);
+  }
+
+  function updateTimerUI(left,total){
+    const fg=document.getElementById("timerFg");
+    const txt=document.getElementById("timerText");
+    const CIRC=2*Math.PI*54;
+    const ratio=Math.max(0,left/total);
+    fg.style.strokeDashoffset=(CIRC*(1-ratio)).toFixed(2);
+    fg.classList.remove("warning","danger");
+    if(ratio<=0.33) fg.classList.add("danger");
+    else if(ratio<=0.66) fg.classList.add("warning");
+    txt.textContent=Math.max(0,left);
+  }
+
+  function onTimeUp(){
+    if(!state.bonusGiven){
+      playCrySound();
+      document.getElementById("mainActions").classList.add("hidden");
+      document.getElementById("secondChance").classList.remove("hidden");
+    }else{
+      state.score.lose++;
+      saveScore();renderScore();
+      playCrySound();
+      setTimeout(()=>closeGame(),1800);
+    }
+  }
+
+  function giveBonusTime(){
+    state.bonusGiven=true;
+    document.getElementById("secondChance").classList.add("hidden");
+    document.getElementById("mainActions").classList.remove("hidden");
+    speakFrench(state.current);
+    setTimeout(()=>startTimer(10),300);
+  }
+
+  function declareWin(){
+    if(!state.inGame) return;
+    clearInterval(state.timer);
+    state.score.win++;
+    saveScore();renderScore();
+
+    document.getElementById("mainActions").classList.add("hidden");
+    document.getElementById("secondChance").classList.add("hidden");
+    document.getElementById("winScreen").classList.remove("hidden");
+
+    playWinSound();
+    setTimeout(()=>speakFrench("Bravo ! Tu as gagné !"),500);
+  }
+
+  function speakCurrent(){
+    if(state.current) speakFrench(state.current);
+  }
+
+  function closeGame(){
+    clearInterval(state.timer);
+    state.inGame=false;state.current=null;
+    document.getElementById("overlay").classList.remove("show");
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }
+
+  // ============= النقاط =============
+  function saveScore(){
+    try{localStorage.setItem("colorGameScore",JSON.stringify(state.score))}catch(e){}
+  }
+  function loadScore(){
+    try{
+      const s=JSON.parse(localStorage.getItem("colorGameScore")||"{}");
+      state.score.win=s.win||0;
+      state.score.lose=s.lose||0;
+    }catch(e){}
+  }
+  function renderScore(){
+    document.getElementById("scoreWin").textContent=state.score.win;
+    document.getElementById("scoreLose").textContent=state.score.lose;
+  }
+  function resetScore(){
+    state.score={win:0,lose:0};
+    saveScore();renderScore();
+  }
+
+  // ============= بدء التشغيل =============
+  document.addEventListener("DOMContentLoaded",()=>{
+    buildGrid();
+    loadScore();
+    renderScore();
+  });
+</script>
+</body>
+</html>
