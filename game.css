@@ -1,0 +1,137 @@
+/* ===== لعبة الألوان ===== */
+
+.game-intro h2{margin:0 0 8px 0}
+.game-intro p{color:#374151;line-height:1.8;margin:6px 0 14px 0}
+
+.score-bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.pill{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 14px;border-radius:999px;font-weight:800;
+  border:1px solid #e5e7eb;background:#fff;
+}
+.pill.win{color:#166534;background:#dcfce7;border-color:#bbf7d0}
+.pill.lose{color:#991b1b;background:#fee2e2;border-color:#fecaca}
+
+/* شبكة الألوان - أسماء بدون لون */
+.colors-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:14px;
+  margin-top:10px;
+}
+.color-btn{
+  position:relative;
+  padding:22px 16px;
+  border:2px dashed #9ca3af;
+  border-radius:14px;
+  background:#fff;
+  color:#111;               /* النص أسود فقط - بلا لون */
+  font-size:22px;
+  font-weight:900;
+  cursor:pointer;
+  transition:transform .12s ease, box-shadow .12s ease, border-color .15s;
+  font-family:"Segoe UI",Arial,sans-serif;
+  letter-spacing:.5px;
+}
+.color-btn:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 18px rgba(0,0,0,.08);
+  border-color:var(--green);
+}
+.color-btn:active{transform:translateY(0)}
+.color-btn:disabled{opacity:.5;cursor:not-allowed}
+
+/* ===== النافذة المنبثقة ===== */
+.overlay{
+  position:fixed;inset:0;
+  background:rgba(0,0,0,.55);
+  display:none;
+  align-items:center;justify-content:center;
+  z-index:100;
+  padding:16px;
+  animation:fadeIn .2s ease;
+}
+.overlay.show{display:flex}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+
+.modal{
+  background:#fff;border-radius:20px;
+  width:min(460px, 100%);
+  padding:22px;
+  box-shadow:0 20px 50px rgba(0,0,0,.3);
+  text-align:center;
+  animation:pop .25s ease;
+}
+@keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+
+.modal-head{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  margin-bottom:10px;text-align:start;
+}
+.modal-head .small{color:#6b7280;font-size:14px;font-weight:700}
+.current-color{
+  font-size:32px;font-weight:900;color:#111;margin-top:4px;
+  font-family:"Segoe UI",Arial,sans-serif;
+}
+.close{
+  border:0;background:#f3f4f6;width:36px;height:36px;border-radius:10px;
+  font-size:22px;cursor:pointer;color:#374151;
+}
+.close:hover{background:#e5e7eb}
+
+/* دائرة المؤقّت */
+.timer-wrap{
+  position:relative;width:180px;height:180px;margin:14px auto;
+}
+.timer-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.timer-bg{fill:none;stroke:#e5e7eb;stroke-width:10}
+.timer-fg{
+  fill:none;stroke:var(--green);stroke-width:10;
+  stroke-linecap:round;
+  stroke-dasharray:339.292;  /* 2*PI*54 */
+  stroke-dashoffset:0;
+  transition:stroke-dashoffset 1s linear, stroke .3s;
+}
+.timer-fg.warning{stroke:#f59e0b}
+.timer-fg.danger{stroke:#dc2626}
+.timer-text{
+  position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+  font-size:56px;font-weight:900;color:#111;
+}
+
+/* الأزرار الكبيرة */
+.btn.big{padding:14px 22px;font-size:18px;border-radius:12px}
+.win-btn{background:#16a34a}
+.win-btn:hover{background:#15803d}
+
+.modal-actions{
+  display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:10px;
+}
+
+.hidden{display:none !important}
+
+/* شاشة الفرصة الثانية (البكاء) */
+.second-chance{
+  background:#fff7ed;border:2px solid #fed7aa;border-radius:14px;
+  padding:18px;margin-top:14px;
+}
+.cry{font-size:64px;line-height:1}
+.second-chance p{font-weight:800;color:#9a3412;margin:6px 0 14px}
+
+/* شاشة الفوز */
+.win-screen{
+  background:#f0fdf4;border:2px solid #bbf7d0;border-radius:14px;
+  padding:18px;margin-top:14px;
+}
+.trophy{font-size:72px;line-height:1;animation:bounce .8s ease infinite alternate}
+@keyframes bounce{to{transform:translateY(-8px)}}
+.win-screen p{font-weight:800;color:#166534;font-size:20px;margin:8px 0 14px}
+
+nav a.active{text-decoration:underline;opacity:1}
+
+/* الاستجابة للشاشات الصغيرة */
+@media (max-width:480px){
+  .color-btn{font-size:18px;padding:18px 10px}
+  .timer-wrap{width:150px;height:150px}
+  .timer-text{font-size:44px}
+}

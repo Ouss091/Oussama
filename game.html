@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>لعبة الألوان — Jeu des couleurs</title>
+<link href="styles.css" rel="stylesheet"/>
+<link href="game.css" rel="stylesheet"/>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <div class="logo">وزارة</div>
+    <div>
+      <div style="font-weight:800">منصة الأستاذ بالأقسام الخاصة</div>
+      <small id="subTitle">لعبة الألوان — Jeu des couleurs</small>
+    </div>
+  </div>
+  <nav>
+    <a href="index.html">تسجيل</a>
+    <a href="teacher.html">البيانات</a>
+    <a href="students.html">التلاميذ</a>
+    <a href="game.html" class="active">اللعبة</a>
+  </nav>
+  <div>
+    <button class="lang-btn" id="langBtn" onclick="toggleLang()">Français</button>
+  </div>
+</header>
+
+<div class="container">
+
+  <!-- بطاقة التعليمات -->
+  <div class="card game-intro">
+    <h2 id="gTitle">🎨 لعبة الألوان بالفرنسية</h2>
+    <p id="gDesc">
+      اضغط على اسم اللون. سيتم نطقه بالفرنسية، ثم لديك
+      <strong>10 ثواني</strong> للبحث عن هذا اللون في القسم.
+      إذا وجدته اضغط <strong>Vainqueur</strong> 🏆، وإن انتهى الوقت ستحصل على
+      <strong>10 ثواني إضافية</strong> كفرصة أخيرة.
+    </p>
+    <div class="score-bar">
+      <span class="pill win">🏆 <span id="scoreWin">0</span></span>
+      <span class="pill lose">😢 <span id="scoreLose">0</span></span>
+      <button class="btn secondary" onclick="resetScore()" id="btnReset">إعادة العدّ</button>
+    </div>
+  </div>
+
+  <!-- شبكة الألوان (أسماء فقط بدون لون) -->
+  <div class="card">
+    <h3 id="gChoose">اختر كلمة لون:</h3>
+    <div class="colors-grid" id="colorsGrid"></div>
+  </div>
+</div>
+
+<!-- نافذة التحدي (المؤقّت) -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <div class="modal-head">
+      <div>
+        <div class="small" id="modalLabel">ابحث عن اللون:</div>
+        <div class="current-color" id="currentColor">—</div>
+      </div>
+      <button class="close" onclick="closeGame(true)">×</button>
+    </div>
+
+    <!-- دائرة المؤقّت -->
+    <div class="timer-wrap">
+      <svg viewBox="0 0 120 120" class="timer-svg">
+        <circle cx="60" cy="60" r="54" class="timer-bg"></circle>
+        <circle cx="60" cy="60" r="54" class="timer-fg" id="timerFg"></circle>
+      </svg>
+      <div class="timer-text" id="timerText">10</div>
+    </div>
+
+    <div class="modal-actions" id="mainActions">
+      <button class="btn big win-btn" onclick="declareWin()" id="btnWin">🏆 Vainqueur</button>
+      <button class="btn secondary big" onclick="speakCurrent()" id="btnRepeat">🔊 Répéter</button>
+    </div>
+
+    <!-- شاشة البكاء + زر التنازل (10 ثواني إضافية) -->
+    <div class="second-chance hidden" id="secondChance">
+      <div class="cry">😢</div>
+      <p id="chanceText">انتهى الوقت! هل تريد 10 ثواني إضافية؟</p>
+      <div class="modal-actions">
+        <button class="btn big" onclick="giveBonusTime()" id="btnBonus">⏱️ +10 ثواني</button>
+        <button class="btn secondary big" onclick="closeGame(true)" id="btnGiveUp">استسلام</button>
+      </div>
+    </div>
+
+    <!-- شاشة الفوز -->
+    <div class="win-screen hidden" id="winScreen">
+      <div class="trophy">🏆</div>
+      <p id="winText">Bravo ! Tu as gagné !</p>
+      <button class="btn big" onclick="closeGame(true)" id="btnContinue">متابعة</button>
+    </div>
+  </div>
+</div>
+
+<footer>© وزارة التضامن الوطني — لعبة تعليمية</footer>
+<script src="app.js"></script>
+<script src="game.js"></script>
+</body>
+</html>
