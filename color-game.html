@@ -10,17 +10,18 @@
   html,body{height:100%}
   body{
     font-family:"Segoe UI",Tahoma,Arial,sans-serif;
-    background:linear-gradient(135deg,#f0f9ff 0%,#e0f2fe 50%,#fef3c7 100%);
-    min-height:100vh;color:#111;padding:20px;
+    background:#000;
+    min-height:100vh;color:#f5f5f5;padding:20px;
   }
   .app{max-width:900px;margin:0 auto}
 
   header{
-    text-align:center;padding:20px;background:#fff;border-radius:20px;
-    box-shadow:0 4px 20px rgba(0,0,0,.08);margin-bottom:20px;
+    text-align:center;padding:20px;background:#0a0a0a;border:1px solid #1f1f1f;
+    border-radius:20px;margin-bottom:20px;
   }
-  header h1{font-size:28px;color:#1e40af;margin-bottom:8px}
-  header p{color:#475569;font-size:16px;line-height:1.7}
+  header h1{font-size:28px;color:#fbbf24;margin-bottom:8px}
+  header p{color:#cbd5e1;font-size:16px;line-height:1.7}
+  header p strong{color:#fbbf24}
 
   /* شريط النقاط */
   .score-bar{
@@ -28,22 +29,21 @@
   }
   .pill{
     padding:8px 18px;border-radius:999px;font-weight:800;font-size:16px;
-    border:2px solid transparent;
+    border:2px solid transparent;background:#0a0a0a;
   }
-  .pill.win{background:#dcfce7;color:#166534;border-color:#bbf7d0}
-  .pill.lose{background:#fee2e2;color:#991b1b;border-color:#fecaca}
+  .pill.win{background:#052e16;color:#4ade80;border-color:#166534}
+  .pill.lose{background:#450a0a;color:#fca5a5;border-color:#991b1b}
   .btn-reset{
-    background:#e5e7eb;border:0;padding:8px 16px;border-radius:999px;
-    font-weight:700;cursor:pointer;color:#374151;
+    background:#1f1f1f;border:1px solid #374151;padding:8px 16px;border-radius:999px;
+    font-weight:700;cursor:pointer;color:#e5e7eb;
   }
-  .btn-reset:hover{background:#d1d5db}
+  .btn-reset:hover{background:#2a2a2a}
 
   /* شبكة الألوان - أسماء فقط */
   .card{
-    background:#fff;border-radius:20px;padding:24px;
-    box-shadow:0 4px 20px rgba(0,0,0,.08);
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:20px;padding:24px;
   }
-  .card h2{color:#1e40af;margin-bottom:16px;font-size:22px}
+  .card h2{color:#fbbf24;margin-bottom:16px;font-size:22px}
 
   .colors-grid{
     display:grid;
@@ -52,10 +52,10 @@
   }
   .color-btn{
     padding:24px 16px;
-    border:3px dashed #9ca3af;
+    border:3px dashed #4b5563;
     border-radius:14px;
-    background:#fafafa;
-    color:#111;
+    background:#111;
+    color:#f5f5f5;
     font-size:22px;font-weight:900;
     cursor:pointer;
     transition:all .2s ease;
@@ -64,15 +64,14 @@
   }
   .color-btn:hover{
     transform:translateY(-3px);
-    box-shadow:0 10px 20px rgba(0,0,0,.1);
-    border-color:#3b82f6;background:#fff;
+    border-color:#fbbf24;background:#1a1a1a;color:#fbbf24;
   }
   .color-btn:active{transform:translateY(0)}
   .color-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
 
   /* ===== النافذة المنبثقة ===== */
   .overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,.6);
+    position:fixed;inset:0;background:rgba(0,0,0,.85);
     display:none;align-items:center;justify-content:center;
     z-index:100;padding:16px;animation:fadeIn .2s ease;
   }
@@ -80,36 +79,44 @@
   @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
   .modal{
-    background:#fff;border-radius:22px;width:min(480px,100%);
-    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.35);
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:22px;width:min(480px,100%);
+    padding:24px;box-shadow:0 20px 60px rgba(0,0,0,.8);
     text-align:center;animation:pop .25s ease;
   }
   @keyframes pop{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
 
   .modal-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:6px}
-  .modal-head .small{color:#6b7280;font-size:14px;font-weight:700;text-align:start}
-  .current-color{font-size:36px;font-weight:900;color:#111;margin-top:4px;text-align:start}
+  .modal-head .small{color:#9ca3af;font-size:14px;font-weight:700;text-align:start}
+  .current-color{font-size:36px;font-weight:900;color:#fbbf24;margin-top:4px;text-align:start}
   .close{
-    border:0;background:#f3f4f6;width:38px;height:38px;border-radius:12px;
-    font-size:22px;cursor:pointer;color:#374151;
+    border:0;background:#1f1f1f;color:#e5e7eb;width:38px;height:38px;border-radius:12px;
+    font-size:22px;cursor:pointer;
   }
-  .close:hover{background:#e5e7eb}
+  .close:hover{background:#2a2a2a}
 
   /* دائرة المؤقّت */
   .timer-wrap{position:relative;width:200px;height:200px;margin:18px auto}
   .timer-svg{width:100%;height:100%;transform:rotate(-90deg)}
-  .timer-bg{fill:none;stroke:#e5e7eb;stroke-width:10}
+  .timer-bg{fill:none;stroke:#1f1f1f;stroke-width:10}
   .timer-fg{
-    fill:none;stroke:#16a34a;stroke-width:10;stroke-linecap:round;
+    fill:none;stroke:#22c55e;stroke-width:10;stroke-linecap:round;
     stroke-dasharray:339.292;stroke-dashoffset:0;
     transition:stroke-dashoffset 1s linear,stroke .3s;
   }
   .timer-fg.warning{stroke:#f59e0b}
-  .timer-fg.danger{stroke:#dc2626}
+  .timer-fg.danger{stroke:#ef4444}
   .timer-text{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
-    font-size:64px;font-weight:900;color:#111;
+    font-size:64px;font-weight:900;color:#f5f5f5;
+    transition:color .3s, transform .2s;
   }
+  .timer-text.pulse{animation:numPulse .5s ease}
+  @keyframes numPulse{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.25);color:#fbbf24}
+    100%{transform:scale(1)}
+  }
+  .timer-text.danger-num{color:#ef4444}
 
   .btn{
     border:0;border-radius:12px;padding:14px 22px;font-size:17px;font-weight:800;
@@ -117,29 +124,29 @@
   }
   .btn.win-btn{background:#16a34a;color:#fff}
   .btn.win-btn:hover{background:#15803d}
-  .btn.secondary{background:#e5e7eb;color:#374151}
-  .btn.secondary:hover{background:#d1d5db}
-  .btn.bonus{background:#f59e0b;color:#fff}
+  .btn.secondary{background:#1f1f1f;color:#e5e7eb;border:1px solid #374151}
+  .btn.secondary:hover{background:#2a2a2a}
+  .btn.bonus{background:#f59e0b;color:#111}
   .btn.bonus:hover{background:#d97706}
 
   .modal-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:12px}
   .hidden{display:none !important}
 
   .second-chance{
-    background:#fff7ed;border:3px solid #fed7aa;border-radius:16px;
+    background:#1c1917;border:3px solid #78350f;border-radius:16px;
     padding:20px;margin-top:14px;
   }
   .cry{font-size:72px;line-height:1;animation:shake .6s ease infinite}
   @keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
-  .second-chance p{font-weight:800;color:#9a3412;margin:10px 0 14px;font-size:17px}
+  .second-chance p{font-weight:800;color:#fdba74;margin:10px 0 14px;font-size:17px}
 
   .win-screen{
-    background:#f0fdf4;border:3px solid #bbf7d0;border-radius:16px;
+    background:#052e16;border:3px solid #166534;border-radius:16px;
     padding:20px;margin-top:14px;
   }
   .trophy{font-size:80px;line-height:1;animation:bounce .8s ease infinite alternate}
   @keyframes bounce{to{transform:translateY(-10px) rotate(-5deg)}}
-  .win-screen p{font-weight:800;color:#166534;font-size:22px;margin:10px 0 14px}
+  .win-screen p{font-weight:800;color:#4ade80;font-size:22px;margin:10px 0 14px}
 
   footer{text-align:center;color:#64748b;margin-top:20px;padding:16px;font-size:14px}
 
@@ -299,12 +306,32 @@
   function tickSound(){tone(900,0.05,"square",0.1)}
 
   // نطق بالفرنسية
-  function speakFrench(text){
+  function speakFrench(text,opts={}){
     if(!("speechSynthesis" in window)) return;
     try{
       window.speechSynthesis.cancel();
       const u=new SpeechSynthesisUtterance(text);
-      u.lang="fr-FR";u.rate=0.9;u.pitch=1.05;
+      u.lang="fr-FR";
+      u.rate=opts.rate||0.9;
+      u.pitch=opts.pitch||1.05;
+      u.volume=opts.volume||1;
+      const voices=window.speechSynthesis.getVoices();
+      const fr=voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"));
+      if(fr) u.voice=fr;
+      window.speechSynthesis.speak(u);
+    }catch(e){console.warn(e)}
+  }
+
+  // نطق رقم بالفرنسية (للعد التنازلي) - أسرع قليلاً وبدون قطع
+  function speakNumberFr(n){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      // لا نستعمل cancel لكي لا نوقف النطق الجاري
+      const u=new SpeechSynthesisUtterance(String(n));
+      u.lang="fr-FR";
+      u.rate=1.1;
+      u.pitch=1.2;
+      u.volume=1;
       const voices=window.speechSynthesis.getVoices();
       const fr=voices.find(v=>v.lang&&v.lang.toLowerCase().startsWith("fr"));
       if(fr) u.voice=fr;
@@ -352,13 +379,20 @@
     clearInterval(state.timer);
     state.timeLeft=seconds;
     updateTimerUI(seconds,seconds);
+    // ننطق الرقم الأول (10) بعد نطق اللون
+    setTimeout(()=>speakNumberFr(seconds),900);
+
     state.timer=setInterval(()=>{
       state.timeLeft--;
       updateTimerUI(state.timeLeft,seconds);
+      // نطق كل رقم من 10 حتى 0 بالفرنسية
+      if(state.timeLeft>=0) speakNumberFr(state.timeLeft);
+      // صوت تِك خفيف في آخر 3 ثواني
       if(state.timeLeft<=3&&state.timeLeft>0) tickSound();
       if(state.timeLeft<=0){
         clearInterval(state.timer);
-        onTimeUp();
+        // ننتظر قليلاً حتى ينتهي نطق "zéro"
+        setTimeout(()=>onTimeUp(),700);
       }
     },1000);
   }
@@ -370,9 +404,17 @@
     const ratio=Math.max(0,left/total);
     fg.style.strokeDashoffset=(CIRC*(1-ratio)).toFixed(2);
     fg.classList.remove("warning","danger");
-    if(ratio<=0.33) fg.classList.add("danger");
+    txt.classList.remove("danger-num");
+    if(ratio<=0.33){
+      fg.classList.add("danger");
+      txt.classList.add("danger-num");
+    }
     else if(ratio<=0.66) fg.classList.add("warning");
     txt.textContent=Math.max(0,left);
+    // نبضة بصرية مع كل رقم للإثارة
+    txt.classList.remove("pulse");
+    void txt.offsetWidth; // إعادة تشغيل الأنيميشن
+    txt.classList.add("pulse");
   }
 
   function onTimeUp(){
