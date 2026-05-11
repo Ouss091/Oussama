@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🎲 اختيار تلميذ عشوائي</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:#000;min-height:100vh;color:#f5f5f5;padding:16px;
+  }
+  .app{max-width:700px;margin:0 auto}
+
+  header{
+    text-align:center;padding:20px;background:#0a0a0a;border:1px solid #1f1f1f;
+    border-radius:20px;margin-bottom:16px;
+  }
+  header h1{font-size:26px;color:#fbbf24;margin-bottom:8px}
+  header p{color:#94a3b8;font-size:15px;line-height:1.6}
+
+  .card{
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:20px;padding:20px;
+    margin-bottom:16px;
+  }
+  .card h2{color:#fbbf24;font-size:20px;margin-bottom:14px}
+
+  /* إدخال الأسماء */
+  .input-row{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+  .input-row input{
+    flex:1;min-width:200px;padding:12px 16px;border-radius:12px;border:2px solid #333;
+    background:#111;color:#f5f5f5;font-size:16px;font-weight:600;
+    font-family:inherit;
+  }
+  .input-row input::placeholder{color:#555}
+  .input-row input:focus{outline:none;border-color:#fbbf24}
+
+  .btn{
+    border:0;border-radius:12px;padding:12px 20px;font-size:16px;font-weight:800;
+    cursor:pointer;transition:all .15s;font-family:inherit;
+  }
+  .btn.primary{background:#fbbf24;color:#111}
+  .btn.primary:hover{background:#f59e0b}
+  .btn.danger{background:#ef4444;color:#fff}
+  .btn.danger:hover{background:#dc2626}
+  .btn.success{background:#22c55e;color:#fff}
+  .btn.success:hover{background:#16a34a}
+  .btn.secondary{background:#1f1f1f;color:#e5e7eb;border:1px solid #374151}
+  .btn.secondary:hover{background:#2a2a2a}
+  .btn:disabled{opacity:.4;cursor:not-allowed}
+
+  /* قائمة التلاميذ */
+  .students-list{
+    display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;
+  }
+  .student-tag{
+    display:inline-flex;align-items:center;gap:6px;
+    background:#1a1a2e;border:1px solid #16213e;border-radius:10px;
+    padding:8px 14px;font-size:15px;font-weight:700;color:#e2e8f0;
+    animation:fadeIn .3s ease;
+  }
+  .student-tag .num{
+    background:#fbbf24;color:#111;width:24px;height:24px;border-radius:50%;
+    display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;
+  }
+  .student-tag .remove{
+    background:none;border:none;color:#ef4444;font-size:18px;cursor:pointer;
+    margin-right:-4px;padding:0 4px;
+  }
+  .student-tag .remove:hover{color:#f87171}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+
+  .count-badge{
+    display:inline-block;background:#1f1f1f;border:1px solid #374151;
+    padding:6px 14px;border-radius:999px;color:#94a3b8;font-size:14px;font-weight:700;
+    margin-bottom:10px;
+  }
+
+  /* منطقة الاختيار العشوائي */
+  .spinner-area{
+    text-align:center;padding:30px 20px;
+  }
+  .chosen-name{
+    font-size:48px;font-weight:900;color:#fbbf24;
+    min-height:70px;display:flex;align-items:center;justify-content:center;
+    transition:all .2s;
+  }
+  .chosen-name.spinning{
+    animation:spin-text .1s ease infinite;
+    color:#94a3b8;font-size:36px;
+  }
+  @keyframes spin-text{
+    0%{opacity:1;transform:translateY(0)}
+    50%{opacity:.3;transform:translateY(-5px)}
+    100%{opacity:1;transform:translateY(0)}
+  }
+  .chosen-name.revealed{
+    animation:reveal .6s ease;
+    color:#fbbf24;
+  }
+  @keyframes reveal{
+    0%{transform:scale(0.5);opacity:0}
+    50%{transform:scale(1.2)}
+    100%{transform:scale(1);opacity:1}
+  }
+
+  .spin-btn{
+    margin-top:20px;padding:18px 40px;font-size:22px;border-radius:16px;
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111;
+    border:none;font-weight:900;cursor:pointer;
+    transition:all .2s;font-family:inherit;
+  }
+  .spin-btn:hover{transform:scale(1.05);box-shadow:0 8px 30px rgba(251,191,36,.3)}
+  .spin-btn:active{transform:scale(0.98)}
+  .spin-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+  .history{margin-top:16px}
+  .history h3{color:#94a3b8;font-size:15px;margin-bottom:8px}
+  .history-list{
+    display:flex;flex-wrap:wrap;gap:6px;
+  }
+  .history-item{
+    background:#1c1917;border:1px solid #78350f;border-radius:8px;
+    padding:6px 12px;font-size:14px;color:#fdba74;font-weight:700;
+  }
+
+  .actions-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+
+  footer{text-align:center;color:#64748b;margin-top:20px;padding:16px;font-size:14px}
+
+  /* رسالة فارغة */
+  .empty-msg{color:#555;font-style:italic;padding:10px}
+
+  @media(max-width:480px){
+    header h1{font-size:22px}
+    .chosen-name{font-size:36px}
+    .spin-btn{font-size:18px;padding:14px 30px}
+    .student-tag{font-size:13px;padding:6px 10px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>🎲 اختيار تلميذ عشوائي</h1>
+    <p>أدخل أسماء التلاميذ، ثم اضغط <strong>اختيار عشوائي</strong> لاختيار تلميذ مع نطق اسمه بصوت عالٍ!</p>
+  </header>
+
+  <!-- إدخال الأسماء -->
+  <div class="card" id="inputCard">
+    <h2>📝 قائمة التلاميذ</h2>
+    <div class="input-row">
+      <input type="text" id="nameInput" placeholder="اكتب اسم التلميذ هنا..." onkeydown="if(event.key==='Enter')addStudent()">
+      <button class="btn primary" onclick="addStudent()">+ إضافة</button>
+    </div>
+    <div class="count-badge" id="countBadge">عدد التلاميذ: 0</div>
+    <div class="students-list" id="studentsList">
+      <div class="empty-msg" id="emptyMsg">لم تُضف أي تلميذ بعد...</div>
+    </div>
+    <div class="actions-row">
+      <button class="btn danger" onclick="clearAll()">🗑️ حذف الكل</button>
+      <button class="btn secondary" onclick="saveStudents()">💾 حفظ القائمة</button>
+    </div>
+  </div>
+
+  <!-- منطقة الاختيار -->
+  <div class="card">
+    <h2>🎯 الاختيار العشوائي</h2>
+    <div class="spinner-area">
+      <div class="chosen-name" id="chosenName">؟</div>
+      <button class="spin-btn" id="spinBtn" onclick="spinAndChoose()" disabled>
+        🎲 اختيار عشوائي
+      </button>
+    </div>
+
+    <!-- سجل الاختيارات -->
+    <div class="history" id="historySection" style="display:none">
+      <h3>📋 تم اختيارهم:</h3>
+      <div class="history-list" id="historyList"></div>
+      <div class="actions-row">
+        <button class="btn secondary" onclick="clearHistory()">مسح السجل</button>
+        <button class="btn secondary" onclick="resetAll()">🔄 إعادة الكل للاختيار</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>© تطبيق تعليمي — اختيار عشوائي للامتحان 🎓</footer>
+</div>
+
+<script>
+  // ============= الحالة =============
+  let students = [];
+  let chosen = [];
+  let isSpinning = false;
+
+  // ============= الصوت =============
+  let audioCtx = null;
+  function ac(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tone(freq,duration=0.15,type="sine",gain=0.15){
+    const ctx=ac();
+    const osc=ctx.createOscillator();
+    const g=ctx.createGain();
+    osc.type=type;osc.frequency.value=freq;
+    g.gain.value=gain;
+    osc.connect(g).connect(ctx.destination);
+    osc.start();
+    g.gain.exponentialRampToValueAtTime(0.0001,ctx.currentTime+duration);
+    osc.stop(ctx.currentTime+duration+0.01);
+  }
+
+  function drumRoll(){
+    // صوت طبل سريع (إثارة)
+    const ctx=ac();
+    for(let i=0;i<12;i++){
+      setTimeout(()=>{
+        const bs=ctx.sampleRate*0.04;
+        const buf=ctx.createBuffer(1,bs,ctx.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let j=0;j<bs;j++) d[j]=(Math.random()*2-1)*(1-j/bs);
+        const src=ctx.createBufferSource();src.buffer=buf;
+        const g=ctx.createGain();g.gain.value=0.2;
+        src.connect(g).connect(ctx.destination);
+        src.start();
+      },i*100);
+    }
+  }
+
+  function tadaSound(){
+    // صوت "تادا!" عند الاختيار
+    const notes=[523.25,659.25,783.99,1046.5];
+    notes.forEach((f,i)=>{
+      setTimeout(()=>tone(f,0.2,"triangle",0.25),i*120);
+    });
+  }
+
+  // نطق الاسم بصوت عالٍ
+  function speakName(name){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u=new SpeechSynthesisUtterance(name);
+      u.lang="ar-SA";
+      u.rate=0.85;
+      u.pitch=1.1;
+      u.volume=1;
+      // محاولة استخدام صوت عربي
+      const voices=window.speechSynthesis.getVoices();
+      const arVoice=voices.find(v=>v.lang&&(v.lang.startsWith("ar")||v.lang.startsWith("fr")));
+      if(arVoice) u.voice=arVoice;
+      window.speechSynthesis.speak(u);
+    }catch(e){console.warn(e)}
+  }
+
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged=()=>{};
+  }
+
+  // ============= إدارة التلاميذ =============
+  function addStudent(){
+    const input=document.getElementById("nameInput");
+    const name=input.value.trim();
+    if(!name) return;
+    if(students.includes(name)){
+      input.style.borderColor="#ef4444";
+      setTimeout(()=>input.style.borderColor="#333",1000);
+      return;
+    }
+    students.push(name);
+    input.value="";
+    input.focus();
+    tone(600,0.1);
+    renderStudents();
+    saveStudents();
+  }
+
+  function removeStudent(index){
+    students.splice(index,1);
+    renderStudents();
+    saveStudents();
+  }
+
+  function clearAll(){
+    if(students.length===0) return;
+    students=[];
+    chosen=[];
+    renderStudents();
+    renderHistory();
+    saveStudents();
+    document.getElementById("chosenName").textContent="؟";
+    document.getElementById("chosenName").className="chosen-name";
+  }
+
+  function renderStudents(){
+    const list=document.getElementById("studentsList");
+    const badge=document.getElementById("countBadge");
+    const empty=document.getElementById("emptyMsg");
+    const spinBtn=document.getElementById("spinBtn");
+
+    badge.textContent="عدد التلاميذ: "+students.length;
+
+    if(students.length===0){
+      list.innerHTML='<div class="empty-msg">لم تُضف أي تلميذ بعد...</div>';
+      spinBtn.disabled=true;
+      return;
+    }
+
+    // تمكين زر الاختيار إذا هناك تلاميذ لم يُختاروا بعد
+    const available=students.filter(s=>!chosen.includes(s));
+    spinBtn.disabled=available.length===0;
+
+    list.innerHTML=students.map((name,i)=>`
+      <div class="student-tag" style="${chosen.includes(name)?'opacity:.4;text-decoration:line-through':''}">
+        <span class="num">${i+1}</span>
+        <span>${name}</span>
+        <button class="remove" onclick="removeStudent(${i})">×</button>
+      </div>
+    `).join("");
+  }
+
+  // ============= الاختيار العشوائي =============
+  function spinAndChoose(){
+    if(isSpinning) return;
+    const available=students.filter(s=>!chosen.includes(s));
+    if(available.length===0) return;
+
+    ac(); // تفعيل الصوت
+    isSpinning=true;
+    const spinBtn=document.getElementById("spinBtn");
+    const display=document.getElementById("chosenName");
+    spinBtn.disabled=true;
+    display.className="chosen-name spinning";
+
+    drumRoll();
+
+    // أنيميشن: تبديل أسماء بسرعة لمدة 2 ثانية
+    let count=0;
+    const totalSpins=20;
+    const interval=setInterval(()=>{
+      const randomIdx=Math.floor(Math.random()*available.length);
+      display.textContent=available[randomIdx];
+      count++;
+      if(count>=totalSpins){
+        clearInterval(interval);
+        // الاختيار النهائي
+        const winner=available[Math.floor(Math.random()*available.length)];
+        setTimeout(()=>{
+          display.textContent=winner;
+          display.className="chosen-name revealed";
+          tadaSound();
+          // نطق الاسم بعد لحظة
+          setTimeout(()=>speakName(winner),600);
+          // إضافة للسجل
+          chosen.push(winner);
+          renderStudents();
+          renderHistory();
+          saveStudents();
+          isSpinning=false;
+          // إعادة تفعيل الزر إذا بقي تلاميذ
+          const remaining=students.filter(s=>!chosen.includes(s));
+          spinBtn.disabled=remaining.length===0;
+        },300);
+      }
+    },100);
+  }
+
+  // ============= سجل الاختيارات =============
+  function renderHistory(){
+    const section=document.getElementById("historySection");
+    const list=document.getElementById("historyList");
+    if(chosen.length===0){
+      section.style.display="none";
+      return;
+    }
+    section.style.display="block";
+    list.innerHTML=chosen.map((name,i)=>`
+      <div class="history-item">${i+1}. ${name}</div>
+    `).join("");
+  }
+
+  function clearHistory(){
+    chosen=[];
+    renderStudents();
+    renderHistory();
+    saveStudents();
+    document.getElementById("chosenName").textContent="؟";
+    document.getElementById("chosenName").className="chosen-name";
+  }
+
+  function resetAll(){
+    chosen=[];
+    renderStudents();
+    renderHistory();
+    saveStudents();
+    document.getElementById("chosenName").textContent="؟";
+    document.getElementById("chosenName").className="chosen-name";
+  }
+
+  // ============= الحفظ المحلي =============
+  function saveStudents(){
+    try{
+      localStorage.setItem("examStudents",JSON.stringify({students,chosen}));
+    }catch(e){}
+  }
+
+  function loadStudents(){
+    try{
+      const data=JSON.parse(localStorage.getItem("examStudents")||"{}");
+      students=data.students||[];
+      chosen=data.chosen||[];
+    }catch(e){}
+  }
+
+  // ============= بدء التشغيل =============
+  document.addEventListener("DOMContentLoaded",()=>{
+    loadStudents();
+    renderStudents();
+    renderHistory();
+  });
+</script>
+</body>
+</html>
