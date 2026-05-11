@@ -160,7 +160,7 @@
     </div>
     <div class="actions-row">
       <button class="btn danger" onclick="clearAll()">🗑️ حذف الكل</button>
-      <button class="btn secondary" onclick="saveStudents()">💾 حفظ القائمة</button>
+      <button class="btn secondary" onclick="loadDefaultList()">📋 استعادة القائمة الأصلية</button>
     </div>
   </div>
 
@@ -190,6 +190,22 @@
 
 <script>
   // ============= الحالة =============
+  // القائمة الافتراضية لتلاميذ القسم (تُحمّل أول مرة فقط، ثم يمكن تعديلها)
+  const DEFAULT_STUDENTS = [
+    "عشو عبد الباقي",
+    "اسراء قاسمي",
+    "آدم كلي",
+    "عايدة",
+    "دار دار جمال",
+    "بلال",
+    "هاجر",
+    "صديق",
+    "اسامة",
+    "اسلام",
+    "سيد أحمد",
+    "يوسف",
+    "حسام"
+  ];
   let students = [];
   let chosen = [];
   let isSpinning = false;
@@ -410,10 +426,34 @@
 
   function loadStudents(){
     try{
-      const data=JSON.parse(localStorage.getItem("examStudents")||"{}");
-      students=data.students||[];
-      chosen=data.chosen||[];
-    }catch(e){}
+      const saved=localStorage.getItem("examStudents");
+      if(saved){
+        const data=JSON.parse(saved);
+        students=data.students||[];
+        chosen=data.chosen||[];
+      }else{
+        // أول فتح للتطبيق: حمّل القائمة الافتراضية
+        students=[...DEFAULT_STUDENTS];
+        chosen=[];
+        saveStudents();
+      }
+    }catch(e){
+      students=[...DEFAULT_STUDENTS];
+      chosen=[];
+    }
+  }
+
+  // زر لاستعادة القائمة الافتراضية
+  function loadDefaultList(){
+    if(confirm("هل تريد استعادة قائمة التلاميذ الأصلية؟ (ستُحذف التعديلات الحالية)")){
+      students=[...DEFAULT_STUDENTS];
+      chosen=[];
+      renderStudents();
+      renderHistory();
+      saveStudents();
+      document.getElementById("chosenName").textContent="؟";
+      document.getElementById("chosenName").className="chosen-name";
+    }
   }
 
   // ============= بدء التشغيل =============
