@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>💪 برنامج كمال الأجسام</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:linear-gradient(180deg,#000 0%,#0a0a1a 100%);
+    min-height:100vh;color:#f5f5f5;padding:16px;
+  }
+  .app{max-width:800px;margin:0 auto}
+
+  /* الرأس */
+  header{
+    text-align:center;padding:20px;background:#0a0a0a;border:1px solid #1f1f1f;
+    border-radius:20px;margin-bottom:16px;
+    background:linear-gradient(135deg,#0a0a0a 0%,#1a1a2e 100%);
+  }
+  header h1{font-size:28px;color:#fbbf24;margin-bottom:8px;
+    text-shadow:0 0 20px rgba(251,191,36,.4)}
+  header p{color:#94a3b8;font-size:15px}
+
+  /* مؤشر المراحل */
+  .stepper{
+    display:flex;justify-content:center;gap:6px;margin-bottom:16px;flex-wrap:wrap;
+  }
+  .step-dot{
+    padding:6px 12px;border-radius:999px;font-size:12px;font-weight:700;
+    background:#1f1f1f;color:#64748b;border:1px solid #374151;
+  }
+  .step-dot.active{background:#fbbf24;color:#111;border-color:#fbbf24}
+  .step-dot.done{background:#22c55e;color:#fff;border-color:#22c55e}
+
+  /* البطاقة */
+  .card{
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:20px;padding:22px;
+    margin-bottom:16px;
+  }
+  .card h2{color:#fbbf24;font-size:22px;margin-bottom:16px;
+    display:flex;align-items:center;gap:10px}
+
+  /* النموذج */
+  .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .form-grid .full{grid-column:1/-1}
+  .field label{
+    display:block;color:#94a3b8;font-size:13px;font-weight:700;margin-bottom:6px;
+  }
+  .field input, .field select{
+    width:100%;padding:12px 14px;border-radius:10px;
+    background:#111;color:#fbbf24;border:2px solid #333;
+    font-size:16px;font-weight:700;font-family:inherit;
+  }
+  .field input:focus, .field select:focus{outline:none;border-color:#fbbf24}
+
+  /* أزرار الجنس */
+  .gender-row{display:flex;gap:10px}
+  .gender-btn{
+    flex:1;padding:14px;border-radius:12px;font-weight:800;font-size:15px;
+    background:#111;color:#94a3b8;border:2px solid #333;cursor:pointer;font-family:inherit;
+    transition:all .2s;
+  }
+  .gender-btn.active{background:#fbbf24;color:#111;border-color:#fbbf24}
+  .gender-btn:hover{border-color:#fbbf24}
+
+  /* الأزرار العامة */
+  .btn{
+    padding:14px 22px;border-radius:12px;border:none;
+    font-size:16px;font-weight:800;cursor:pointer;font-family:inherit;
+    transition:all .15s;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn.primary{background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111}
+  .btn.primary:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(251,191,36,.3)}
+  .btn.secondary{background:#1f1f1f;color:#e5e7eb;border:1px solid #374151}
+  .btn.secondary:hover{background:#2a2a2a}
+  .btn.success{background:#22c55e;color:#fff}
+  .btn:disabled{opacity:.5;cursor:not-allowed}
+
+  .actions{display:flex;gap:10px;justify-content:space-between;margin-top:16px;flex-wrap:wrap}
+
+  /* بطاقة السعرات */
+  .calorie-result{
+    background:linear-gradient(135deg,#1c1917 0%,#0a0a0a 100%);
+    border:2px solid #fbbf24;border-radius:18px;
+    padding:24px;text-align:center;margin-top:14px;
+  }
+  .calorie-num{
+    font-size:64px;font-weight:900;color:#fbbf24;line-height:1;
+    text-shadow:0 0 30px rgba(251,191,36,.5);
+  }
+  .calorie-label{color:#94a3b8;font-size:15px;font-weight:700;margin-top:6px}
+  .calorie-grid{
+    display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:18px;
+  }
+  .calorie-mini{
+    background:#111;border:1px solid #1f1f1f;border-radius:10px;padding:10px;
+  }
+  .calorie-mini .v{font-size:18px;font-weight:900;color:#22c55e}
+  .calorie-mini .l{font-size:11px;color:#64748b;margin-top:2px}
+
+  /* أيام الأسبوع */
+  .days-grid{
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(95px,1fr));gap:8px;
+  }
+  .day-btn{
+    padding:14px 8px;border-radius:14px;border:2px solid #333;
+    background:#111;color:#e5e7eb;cursor:pointer;font-family:inherit;
+    text-align:center;transition:all .2s;font-weight:800;
+  }
+  .day-btn .d-name{font-size:14px}
+  .day-btn .d-num{font-size:11px;color:#64748b;margin-top:2px}
+  .day-btn.selected{
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);color:#111;border-color:#fbbf24;
+    transform:translateY(-2px);box-shadow:0 8px 20px rgba(251,191,36,.3);
+  }
+  .day-btn.selected .d-num{color:#111}
+
+  /* رسم جسم الإنسان */
+  .body-section{
+    display:grid;grid-template-columns:1fr;gap:16px;
+  }
+  @media(min-width:640px){.body-section{grid-template-columns:300px 1fr}}
+
+  .body-svg-wrap{
+    background:radial-gradient(circle at center,#1a1a2e 0%,#000 70%);
+    border-radius:18px;padding:14px;text-align:center;
+    border:1px solid #1f1f1f;
+  }
+  .body-svg-wrap .view-toggle{
+    display:flex;gap:6px;justify-content:center;margin-bottom:10px;
+  }
+  .view-btn{
+    padding:6px 14px;border-radius:8px;background:#1f1f1f;color:#94a3b8;
+    border:1px solid #374151;cursor:pointer;font-size:13px;font-weight:700;font-family:inherit;
+  }
+  .view-btn.active{background:#fbbf24;color:#111;border-color:#fbbf24}
+
+  svg.body{width:100%;height:auto;max-height:480px;display:block;margin:0 auto}
+  svg.body .muscle{
+    fill:#374151;stroke:#1f1f1f;stroke-width:1.5;
+    cursor:pointer;transition:all .2s;
+  }
+  svg.body .muscle:hover{fill:#fbbf24;filter:drop-shadow(0 0 8px #fbbf24)}
+  svg.body .muscle.selected{fill:#fbbf24;filter:drop-shadow(0 0 12px #fbbf24)}
+  svg.body .body-outline{fill:#0a0a0a;stroke:#374151;stroke-width:2}
+
+  /* قائمة العضلات/التمارين */
+  .muscle-info{
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:18px;
+    padding:18px;min-height:400px;
+  }
+  .muscle-info h3{color:#fbbf24;font-size:20px;margin-bottom:12px}
+  .muscle-info .hint{color:#64748b;font-size:14px;font-style:italic;text-align:center;padding:30px}
+
+  .exercise-list{display:flex;flex-direction:column;gap:10px}
+  .exercise-card{
+    background:#111;border:2px solid #1f1f1f;border-radius:14px;padding:14px;
+    cursor:pointer;transition:all .2s;
+  }
+  .exercise-card:hover{border-color:#fbbf24;transform:translateX(-3px)}
+  .exercise-card.selected{
+    border-color:#22c55e;background:linear-gradient(135deg,#052e16,#0a0a0a);
+  }
+  .exercise-card .head{
+    display:flex;justify-content:space-between;align-items:center;gap:10px;
+  }
+  .exercise-card .name{font-size:16px;font-weight:900;color:#f5f5f5}
+  .exercise-card .check{
+    width:28px;height:28px;border-radius:50%;border:2px solid #374151;
+    display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;
+  }
+  .exercise-card.selected .check{background:#22c55e;border-color:#22c55e;color:#fff}
+  .exercise-card .meta{
+    color:#94a3b8;font-size:13px;margin-top:6px;display:flex;gap:10px;flex-wrap:wrap;
+  }
+  .exercise-card .meta span{
+    background:#1f1f1f;padding:3px 10px;border-radius:6px;font-weight:700;
+  }
+  .exercise-card .desc{color:#cbd5e1;font-size:13px;margin-top:8px;line-height:1.6}
+
+  /* البرنامج النهائي */
+  .program-day{
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:14px;padding:14px;margin-bottom:10px;
+  }
+  .program-day h4{color:#fbbf24;font-size:16px;margin-bottom:8px}
+  .program-day .muscles-list{color:#94a3b8;font-size:14px;margin-bottom:8px}
+  .program-day .ex-item{
+    background:#111;padding:8px 12px;border-radius:8px;margin-top:6px;
+    font-size:14px;display:flex;justify-content:space-between;
+  }
+  .program-day .ex-item .nm{color:#e5e7eb;font-weight:700}
+  .program-day .ex-item .sr{color:#fbbf24;font-weight:800;font-size:13px}
+
+  .empty-msg{color:#64748b;text-align:center;padding:40px;font-style:italic}
+
+  /* رسالة سعرات حسب الهدف */
+  .goal-tips{
+    background:#1c1917;border:1px solid #78350f;border-radius:12px;
+    padding:14px;margin-top:14px;color:#fdba74;font-size:14px;line-height:1.7;
+  }
+
+  footer{text-align:center;color:#475569;padding:16px;font-size:13px;margin-top:10px}
+
+  @media(max-width:480px){
+    .form-grid{grid-template-columns:1fr}
+    header h1{font-size:22px}
+    .calorie-num{font-size:48px}
+  }
+
+  .hidden{display:none !important}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <header>
+    <h1>💪 برنامج كمال الأجسام</h1>
+    <p>احسب سعراتك، اختر أيام التدريب، وابنِ برنامجك الخاص!</p>
+  </header>
+
+  <!-- مؤشر المراحل -->
+  <div class="stepper" id="stepper">
+    <span class="step-dot active" id="dot1">1. البيانات</span>
+    <span class="step-dot" id="dot2">2. الأيام</span>
+    <span class="step-dot" id="dot3">3. العضلات والتمارين</span>
+    <span class="step-dot" id="dot4">4. البرنامج</span>
+  </div>
+
+  <!-- ============ المرحلة 1: البيانات ============ -->
+  <div class="card" id="screen1">
+    <h2>📋 معلوماتك الشخصية</h2>
+    <div class="form-grid">
+      <div class="field full">
+        <label>الجنس</label>
+        <div class="gender-row">
+          <button class="gender-btn active" id="genM" onclick="setGender('male')">♂️ ذكر</button>
+          <button class="gender-btn" id="genF" onclick="setGender('female')">♀️ أنثى</button>
+        </div>
+      </div>
+      <div class="field">
+        <label>العمر (سنة)</label>
+        <input type="number" id="age" min="10" max="100" value="25" />
+      </div>
+      <div class="field">
+        <label>الطول (سم)</label>
+        <input type="number" id="height" min="100" max="250" value="175" />
+      </div>
+      <div class="field">
+        <label>الوزن (كغ)</label>
+        <input type="number" id="weight" min="30" max="250" value="70" />
+      </div>
+      <div class="field">
+        <label>مستوى النشاط</label>
+        <select id="activity">
+          <option value="1.2">قليل النشاط (مكتبي)</option>
+          <option value="1.375">نشاط خفيف (1-3 أيام)</option>
+          <option value="1.55" selected>نشاط متوسط (3-5 أيام)</option>
+          <option value="1.725">نشاط عالٍ (6-7 أيام)</option>
+          <option value="1.9">نشاط مكثف جداً</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>الهدف</label>
+        <select id="goal">
+          <option value="cut">تنشيف (خسارة دهون)</option>
+          <option value="maintain" selected>الحفاظ على الوزن</option>
+          <option value="bulk">تضخيم (زيادة عضلات)</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="calorieResult" class="hidden"></div>
+
+    <div class="actions">
+      <span></span>
+      <button class="btn primary" onclick="calculateCalories()">احسب وتابع ←</button>
+    </div>
+  </div>
+
+  <!-- ============ المرحلة 2: الأيام ============ -->
+  <div class="card hidden" id="screen2">
+    <h2>📅 اختر أيام التدريب</h2>
+    <p style="color:#94a3b8;margin-bottom:14px;font-size:14px">
+      اضغط على الأيام التي ستدرّب فيها. الأسبوع يبدأ من السبت.
+    </p>
+    <div class="days-grid" id="daysGrid"></div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="goTo(1)">→ رجوع</button>
+      <button class="btn primary" onclick="goToMuscles()">التالي ←</button>
+    </div>
+  </div>
+
+  <!-- ============ المرحلة 3: العضلات والتمارين ============ -->
+  <div class="card hidden" id="screen3">
+    <h2>🏋️ <span id="dayHeader">اليوم</span> — اختر العضلات والتمارين</h2>
+    <p style="color:#94a3b8;margin-bottom:14px;font-size:14px">
+      اضغط على العضلة في الرسم → ستظهر التمارين → اختر التمارين المناسبة.
+    </p>
+
+    <div class="body-section">
+      <div class="body-svg-wrap">
+        <div class="view-toggle">
+          <button class="view-btn active" id="vFront" onclick="setView('front')">واجهة أمامية</button>
+          <button class="view-btn" id="vBack" onclick="setView('back')">واجهة خلفية</button>
+        </div>
+        <div id="bodySvgContainer"></div>
+      </div>
+
+      <div class="muscle-info">
+        <h3 id="muscleTitle">اختر عضلة 👈</h3>
+        <div id="exerciseList">
+          <div class="hint">اضغط على عضلة في الرسم لرؤية التمارين</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- تنقّل بين الأيام المختارة -->
+    <div id="dayNav" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:14px"></div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="goTo(2)">→ رجوع</button>
+      <button class="btn success" onclick="goTo(4)">عرض البرنامج ←</button>
+    </div>
+  </div>
+
+  <!-- ============ المرحلة 4: البرنامج النهائي ============ -->
+  <div class="card hidden" id="screen4">
+    <h2>📋 برنامجك الأسبوعي</h2>
+    <div id="programDisplay"></div>
+
+    <div class="actions">
+      <button class="btn secondary" onclick="goTo(3)">→ تعديل</button>
+      <button class="btn primary" onclick="window.print()">🖨️ طباعة</button>
+    </div>
+  </div>
+
+  <footer>💪 برنامج تدريبي شامل — حافظ على استمراريتك!</footer>
+</div>
+
+<script>
+/* =========================================================
+   البيانات
+========================================================= */
+
+const DAYS = [
+  { key:"sat", name:"السبت" }, { key:"sun", name:"الأحد" },
+  { key:"mon", name:"الإثنين" }, { key:"tue", name:"الثلاثاء" },
+  { key:"wed", name:"الأربعاء" }, { key:"thu", name:"الخميس" },
+  { key:"fri", name:"الجمعة" }
+];
+
+// قائمة العضلات والتمارين
+const MUSCLES = {
+  chest: { name:"الصدر 💪", exercises:[
+    { name:"بنش بريس بالبار",  sets:"4×8-10", desc:"أساسي لتضخيم الصدر بالكامل، يستهدف الصدر الأوسط" },
+    { name:"بنش مائل علوي",    sets:"4×10",   desc:"يستهدف الجزء العلوي من الصدر، استلقِ على بنش بزاوية 30-45°" },
+    { name:"بنش مائل سفلي",    sets:"3×10",   desc:"يستهدف أسفل الصدر، الزاوية تكون لأسفل" },
+    { name:"بنش بالدمبل",      sets:"4×10",   desc:"حركة أوسع وأكثر مرونة للعضلة، ممتاز للتوازن" },
+    { name:"تفتيح بالدمبل",   sets:"3×12",   desc:"يمدّ ألياف الصدر، حافظ على ثني خفيف بالكوع" },
+    { name:"ضغط على الأرض (Push-up)", sets:"3×فشل", desc:"تمرين بدون أوزان، ممتاز للإحماء أو الإنهاء" },
+    { name:"كابل كروس أوفر",  sets:"3×12",   desc:"عزل ممتاز لمنتصف الصدر بالكابل" }
+  ]},
+  shoulders: { name:"الأكتاف 🏋️", exercises:[
+    { name:"ضغط الكتف بالبار",  sets:"4×8-10", desc:"مركّب، يستهدف الكتف الأمامي والأوسط" },
+    { name:"ضغط الكتف بالدمبل", sets:"4×10",   desc:"يضمن توازن العضلة بين اليدين" },
+    { name:"رفع جانبي بالدمبل", sets:"4×12",   desc:"عزل تام للكتف الجانبي (ضروري لعرض الكتف)" },
+    { name:"رفع أمامي",          sets:"3×12",   desc:"للكتف الأمامي" },
+    { name:"الانحناء + رفع جانبي (Reverse fly)", sets:"4×12", desc:"للكتف الخلفي وعضلات الظهر العلوية" },
+    { name:"الفيس بول (Face pull)",  sets:"3×15", desc:"ممتاز لصحة الكتف وتوازن العضلات" }
+  ]},
+  back: { name:"الظهر 🦅", exercises:[
+    { name:"العقلة (Pull-up)",    sets:"4×فشل", desc:"الأفضل لعضلة الظهر العلوية واللاتس" },
+    { name:"السحب الأرضي (Deadlift)", sets:"4×6-8", desc:"تمرين القوة الكامل، يدرّب الظهر السفلي بقوة" },
+    { name:"بار رو (Barbell Row)", sets:"4×10", desc:"تضخيم سُمك الظهر" },
+    { name:"دامبل رو", sets:"4×10", desc:"تركيز على جانب واحد، توازن أفضل" },
+    { name:"لات بول داون", sets:"4×12", desc:"بديل العقلة بالكابل، عرض الظهر" },
+    { name:"كيبل رو جالس", sets:"3×12", desc:"وسط الظهر" },
+    { name:"هايبر إكستنشن", sets:"3×15", desc:"للظهر السفلي والعضلات المثبّتة" }
+  ]},
+  arms: { name:"الذراعان 💪", exercises:[
+    { name:"بايسبس بالبار", sets:"4×10", desc:"التمرين الكلاسيكي للبايسبس" },
+    { name:"بايسبس بالدمبل (Curl)", sets:"4×12", desc:"يسمح بدوران الكف لتفعيل أكبر" },
+    { name:"هامر كيرل", sets:"3×12", desc:"للذراع والساعد معاً" },
+    { name:"ترايسبس بالبار (Skull crusher)", sets:"4×10", desc:"عزل التراي مستلقياً" },
+    { name:"الديبس (Dips)", sets:"4×فشل", desc:"تمرين مركّب رائع للترايسبس والصدر" },
+    { name:"ترايسبس بالكابل", sets:"4×12", desc:"عزل تام للترايسبس" },
+    { name:"كيرل مركز", sets:"3×12", desc:"عزل البايسبس بأقصى توتر" }
+  ]},
+  legs: { name:"الأرجل 🦵", exercises:[
+    { name:"السكوات بالبار (Squat)", sets:"4×8-10", desc:"ملك تمارين الأرجل، يدرّب الفخد والأرداف" },
+    { name:"الديدلفت روماني", sets:"4×10", desc:"يستهدف الـHamstring (خلف الفخد)" },
+    { name:"ليج برس", sets:"4×12", desc:"بديل آمن للسكوات، حِمل عالٍ" },
+    { name:"اللينج (Lunges)", sets:"3×12 لكل رجل", desc:"للأرجل والتوازن" },
+    { name:"ليج إكستنشن", sets:"3×15", desc:"عزل تام لمقدمة الفخد" },
+    { name:"ليج كيرل", sets:"3×12", desc:"عزل خلف الفخد" },
+    { name:"رفع كعب (Calf raise)", sets:"4×15", desc:"للسمانة" }
+  ]},
+  abs: { name:"البطن 🔥", exercises:[
+    { name:"كرنش (Crunch)", sets:"4×20", desc:"لعضلات البطن العلوية" },
+    { name:"رفع الأرجل", sets:"4×15", desc:"لعضلات البطن السفلية" },
+    { name:"بلانك (Plank)", sets:"3×60ث", desc:"يقوّي عضلات البطن العميقة" },
+    { name:"كرنش جانبي (Russian twist)", sets:"3×20", desc:"للعضلات الجانبية" },
+    { name:"ماونتن كلايمر", sets:"3×30ث", desc:"كارديو + بطن" },
+    { name:"عجلة البطن", sets:"3×10", desc:"تمرين متقدم لعضلات الكور" }
+  ]},
+  glutes: { name:"الأرداف 🍑", exercises:[
+    { name:"هيب ثرست (Hip thrust)", sets:"4×10", desc:"الأفضل لتضخيم الأرداف" },
+    { name:"سكوات", sets:"4×10", desc:"يفعّل الأرداف بقوة" },
+    { name:"الديدلفت الروماني", sets:"4×10", desc:"للـ Hamstring والأرداف" },
+    { name:"الجلوت بريدج", sets:"3×15", desc:"بدون أوزان أو بقرص" },
+    { name:"ركلة بالكابل (Cable kickback)", sets:"3×12", desc:"عزل تام للأرداف" }
+  ]},
+  forearms: { name:"الساعدان 💪", exercises:[
+    { name:"كيرل الساعد (Wrist curl)", sets:"4×15", desc:"لمقدمة الساعد" },
+    { name:"كيرل عكسي", sets:"4×15", desc:"لخلف الساعد" },
+    { name:"تعلّق على البار", sets:"3×فشل", desc:"للقبضة والساعد" }
+  ]}
+};
+
+// خريطة المناطق على الـSVG → اسم العضلة
+// (المفاتيح في الـSVG كـ data-muscle)
+
+/* =========================================================
+   الحالة
+========================================================= */
+const state = {
+  step: 1,
+  user: { gender:"male", age:25, height:175, weight:70, activity:1.55, goal:"maintain" },
+  calories: null,
+  selectedDays: [],     // مثل ["sat","mon","wed"]
+  currentDay: null,     // اليوم النشط في المرحلة 3
+  view: "front",        // أمامي/خلفي
+  // البرنامج: { sat: { muscles: ["chest"], exercises: { chest: ["بنش بريس بالبار", ...] } } }
+  program: {}
+};
+
+/* =========================================================
+   التحكم بالمراحل
+========================================================= */
+function goTo(step){
+  state.step = step;
+  for(let i=1;i<=4;i++){
+    document.getElementById("screen"+i).classList.toggle("hidden", i!==step);
+    const dot = document.getElementById("dot"+i);
+    dot.classList.remove("active","done");
+    if(i<step) dot.classList.add("done");
+    else if(i===step) dot.classList.add("active");
+  }
+  if(step===2) renderDays();
+  if(step===3) renderMuscleStep();
+  if(step===4) renderProgram();
+  window.scrollTo({top:0, behavior:"smooth"});
+}
+
+function setGender(g){
+  state.user.gender = g;
+  document.getElementById("genM").classList.toggle("active", g==="male");
+  document.getElementById("genF").classList.toggle("active", g==="female");
+}
+
+/* =========================================================
+   حساب السعرات
+========================================================= */
+function calculateCalories(){
+  const u = state.user;
+  u.age = parseInt(document.getElementById("age").value)||25;
+  u.height = parseInt(document.getElementById("height").value)||175;
+  u.weight = parseInt(document.getElementById("weight").value)||70;
+  u.activity = parseFloat(document.getElementById("activity").value);
+  u.goal = document.getElementById("goal").value;
+
+  // معادلة Mifflin-St Jeor
+  let bmr;
+  if(u.gender === "male"){
+    bmr = 10*u.weight + 6.25*u.height - 5*u.age + 5;
+  } else {
+    bmr = 10*u.weight + 6.25*u.height - 5*u.age - 161;
+  }
+  const tdee = bmr * u.activity;
+  let target = tdee;
+  let goalLabel = "للحفاظ على وزنك";
+  if(u.goal === "cut"){ target = tdee - 400; goalLabel = "للتنشيف"; }
+  else if(u.goal === "bulk"){ target = tdee + 400; goalLabel = "للتضخيم"; }
+
+  // البروتين/الكارب/الدهون
+  const protein = Math.round(u.weight * (u.goal==="bulk"?2:1.8));
+  const fat = Math.round(target * 0.25 / 9);
+  const carbs = Math.round((target - protein*4 - fat*9) / 4);
+
+  state.calories = {
+    bmr: Math.round(bmr),
+    tdee: Math.round(tdee),
+    target: Math.round(target),
+    protein, carbs, fat,
+    goalLabel
+  };
+
+  document.getElementById("calorieResult").classList.remove("hidden");
+  document.getElementById("calorieResult").innerHTML = `
+    <div class="calorie-result">
+      <div class="calorie-num">${state.calories.target}</div>
+      <div class="calorie-label">سعرة حرارية يومياً ${goalLabel}</div>
+      <div class="calorie-grid">
+        <div class="calorie-mini"><div class="v">${protein}غ</div><div class="l">بروتين</div></div>
+        <div class="calorie-mini"><div class="v">${carbs}غ</div><div class="l">كربوهيدرات</div></div>
+        <div class="calorie-mini"><div class="v">${fat}غ</div><div class="l">دهون</div></div>
+      </div>
+      <div class="goal-tips">
+        💡 معدل أيضك الأساسي (BMR): <strong>${state.calories.bmr}</strong> سعرة |
+        إجمالي حرقك (TDEE): <strong>${state.calories.tdee}</strong> سعرة
+      </div>
+    </div>
+  `;
+
+  setTimeout(()=>goTo(2), 1500);
+}
+
+/* =========================================================
+   اختيار الأيام
+========================================================= */
+function renderDays(){
+  const grid = document.getElementById("daysGrid");
+  grid.innerHTML = "";
+  DAYS.forEach((d,i) => {
+    const btn = document.createElement("button");
+    btn.className = "day-btn" + (state.selectedDays.includes(d.key) ? " selected" : "");
+    btn.innerHTML = `<div class="d-name">${d.name}</div><div class="d-num">يوم ${i+1}</div>`;
+    btn.onclick = ()=> toggleDay(d.key);
+    grid.appendChild(btn);
+  });
+}
+function toggleDay(key){
+  const idx = state.selectedDays.indexOf(key);
+  if(idx >= 0){
+    state.selectedDays.splice(idx,1);
+    delete state.program[key];
+  } else {
+    state.selectedDays.push(key);
+    if(!state.program[key]) state.program[key] = { muscles:[], exercises:{} };
+  }
+  // ترتيب حسب أيام الأسبوع
+  state.selectedDays.sort((a,b) => DAYS.findIndex(d=>d.key===a) - DAYS.findIndex(d=>d.key===b));
+  renderDays();
+}
+
+function goToMuscles(){
+  if(state.selectedDays.length === 0){
+    alert("اختر يوماً واحداً على الأقل");
+    return;
+  }
+  state.currentDay = state.selectedDays[0];
+  goTo(3);
+}
+
+/* =========================================================
+   رسم جسم الإنسان (SVG)
+========================================================= */
+function bodyFrontSVG(){
+  return `
+  <svg class="body" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- الرأس -->
+    <ellipse cx="100" cy="35" rx="22" ry="28" class="body-outline"/>
+    <!-- الرقبة -->
+    <rect x="92" y="60" width="16" height="14" class="body-outline"/>
+    <!-- الجذع -->
+    <path d="M 60,80 Q 100,72 140,80 L 145,200 Q 100,210 55,200 Z" class="body-outline"/>
+    <!-- الذراعان -->
+    <path d="M 60,82 Q 38,90 30,140 Q 28,170 36,200 Q 40,210 48,205 Q 52,170 56,135 Z" class="body-outline"/>
+    <path d="M 140,82 Q 162,90 170,140 Q 172,170 164,200 Q 160,210 152,205 Q 148,170 144,135 Z" class="body-outline"/>
+    <!-- الأرجل -->
+    <path d="M 60,205 Q 65,300 70,380 L 90,380 Q 95,300 90,205 Z" class="body-outline"/>
+    <path d="M 110,205 Q 105,300 110,380 L 130,380 Q 135,300 140,205 Z" class="body-outline"/>
+
+    <!-- العضلات (قابلة للضغط) -->
+    <!-- الصدر -->
+    <ellipse class="muscle" data-muscle="chest" cx="80" cy="105" rx="18" ry="14"/>
+    <ellipse class="muscle" data-muscle="chest" cx="120" cy="105" rx="18" ry="14"/>
+    <!-- الأكتاف -->
+    <ellipse class="muscle" data-muscle="shoulders" cx="55" cy="88" rx="11" ry="10"/>
+    <ellipse class="muscle" data-muscle="shoulders" cx="145" cy="88" rx="11" ry="10"/>
+    <!-- البايسبس / الذراعان -->
+    <ellipse class="muscle" data-muscle="arms" cx="42" cy="125" rx="9" ry="18"/>
+    <ellipse class="muscle" data-muscle="arms" cx="158" cy="125" rx="9" ry="18"/>
+    <!-- الساعدان -->
+    <ellipse class="muscle" data-muscle="forearms" cx="38" cy="170" rx="8" ry="18"/>
+    <ellipse class="muscle" data-muscle="forearms" cx="162" cy="170" rx="8" ry="18"/>
+    <!-- البطن -->
+    <rect class="muscle" data-muscle="abs" x="88" y="130" width="24" height="55" rx="6"/>
+    <!-- الأرجل (مقدمة الفخد) -->
+    <ellipse class="muscle" data-muscle="legs" cx="78" cy="260" rx="14" ry="40"/>
+    <ellipse class="muscle" data-muscle="legs" cx="122" cy="260" rx="14" ry="40"/>
+    <!-- السمانة -->
+    <ellipse class="muscle" data-muscle="legs" cx="80" cy="345" rx="11" ry="22"/>
+    <ellipse class="muscle" data-muscle="legs" cx="120" cy="345" rx="11" ry="22"/>
+  </svg>`;
+}
+
+function bodyBackSVG(){
+  return `
+  <svg class="body" viewBox="0 0 200 400" xmlns="http://www.w3.org/2000/svg">
+    <!-- الرأس -->
+    <ellipse cx="100" cy="35" rx="22" ry="28" class="body-outline"/>
+    <!-- الرقبة -->
+    <rect x="92" y="60" width="16" height="14" class="body-outline"/>
+    <!-- الجذع -->
+    <path d="M 60,80 Q 100,72 140,80 L 145,200 Q 100,210 55,200 Z" class="body-outline"/>
+    <!-- الذراعان -->
+    <path d="M 60,82 Q 38,90 30,140 Q 28,170 36,200 Q 40,210 48,205 Q 52,170 56,135 Z" class="body-outline"/>
+    <path d="M 140,82 Q 162,90 170,140 Q 172,170 164,200 Q 160,210 152,205 Q 148,170 144,135 Z" class="body-outline"/>
+    <!-- الأرجل -->
+    <path d="M 60,205 Q 65,300 70,380 L 90,380 Q 95,300 90,205 Z" class="body-outline"/>
+    <path d="M 110,205 Q 105,300 110,380 L 130,380 Q 135,300 140,205 Z" class="body-outline"/>
+
+    <!-- العضلات الخلفية -->
+    <!-- الكتف الخلفي -->
+    <ellipse class="muscle" data-muscle="shoulders" cx="55" cy="88" rx="11" ry="10"/>
+    <ellipse class="muscle" data-muscle="shoulders" cx="145" cy="88" rx="11" ry="10"/>
+    <!-- الظهر العلوي + اللاتس -->
+    <path class="muscle" data-muscle="back" d="M 65,90 Q 100,82 135,90 L 140,160 Q 100,170 60,160 Z"/>
+    <!-- الترايسبس -->
+    <ellipse class="muscle" data-muscle="arms" cx="42" cy="125" rx="9" ry="18"/>
+    <ellipse class="muscle" data-muscle="arms" cx="158" cy="125" rx="9" ry="18"/>
+    <!-- الساعدان -->
+    <ellipse class="muscle" data-muscle="forearms" cx="38" cy="170" rx="8" ry="18"/>
+    <ellipse class="muscle" data-muscle="forearms" cx="162" cy="170" rx="8" ry="18"/>
+    <!-- الظهر السفلي -->
+    <rect class="muscle" data-muscle="back" x="80" y="165" width="40" height="22" rx="4"/>
+    <!-- الأرداف -->
+    <ellipse class="muscle" data-muscle="glutes" cx="82" cy="210" rx="16" ry="14"/>
+    <ellipse class="muscle" data-muscle="glutes" cx="118" cy="210" rx="16" ry="14"/>
+    <!-- خلف الفخد (Hamstring) -->
+    <ellipse class="muscle" data-muscle="legs" cx="78" cy="265" rx="14" ry="38"/>
+    <ellipse class="muscle" data-muscle="legs" cx="122" cy="265" rx="14" ry="38"/>
+    <!-- السمانة -->
+    <ellipse class="muscle" data-muscle="legs" cx="80" cy="345" rx="11" ry="22"/>
+    <ellipse class="muscle" data-muscle="legs" cx="120" cy="345" rx="11" ry="22"/>
+  </svg>`;
+}
+
+function setView(v){
+  state.view = v;
+  document.getElementById("vFront").classList.toggle("active", v==="front");
+  document.getElementById("vBack").classList.toggle("active", v==="back");
+  renderBody();
+}
+
+function renderBody(){
+  const c = document.getElementById("bodySvgContainer");
+  c.innerHTML = state.view === "front" ? bodyFrontSVG() : bodyBackSVG();
+  // ربط الأحداث
+  c.querySelectorAll(".muscle").forEach(el => {
+    const m = el.dataset.muscle;
+    el.addEventListener("click", () => selectMuscle(m));
+    // إذا العضلة مختارة لهذا اليوم، أبرزها
+    const dayProgram = state.program[state.currentDay];
+    if(dayProgram && dayProgram.muscles.includes(m)){
+      el.classList.add("selected");
+    }
+  });
+}
+
+function renderMuscleStep(){
+  // عنوان اليوم
+  const dayObj = DAYS.find(d => d.key === state.currentDay);
+  document.getElementById("dayHeader").textContent = dayObj ? dayObj.name : "";
+
+  // أزرار التنقل بين الأيام
+  const nav = document.getElementById("dayNav");
+  nav.innerHTML = "";
+  state.selectedDays.forEach(k => {
+    const d = DAYS.find(x=>x.key===k);
+    const b = document.createElement("button");
+    b.className = "view-btn" + (k===state.currentDay ? " active" : "");
+    const muscleCount = state.program[k]?.muscles.length || 0;
+    b.textContent = d.name + (muscleCount > 0 ? ` (${muscleCount})` : "");
+    b.onclick = ()=> { state.currentDay = k; renderMuscleStep(); };
+    nav.appendChild(b);
+  });
+
+  renderBody();
+  document.getElementById("muscleTitle").textContent = "اختر عضلة 👈";
+  document.getElementById("exerciseList").innerHTML = '<div class="hint">اضغط على عضلة في الرسم لرؤية التمارين</div>';
+}
+
+/* =========================================================
+   اختيار العضلة وعرض التمارين
+========================================================= */
+function selectMuscle(muscleKey){
+  const dayP = state.program[state.currentDay];
+  if(!dayP) return;
+  const muscle = MUSCLES[muscleKey];
+  if(!muscle) return;
+
+  // إضافة العضلة إن لم تكن موجودة
+  if(!dayP.muscles.includes(muscleKey)){
+    dayP.muscles.push(muscleKey);
+    if(!dayP.exercises[muscleKey]) dayP.exercises[muscleKey] = [];
+  }
+
+  // تحديث الإبراز في الـ SVG
+  document.querySelectorAll(`#bodySvgContainer .muscle[data-muscle="${muscleKey}"]`).forEach(el=>el.classList.add("selected"));
+
+  // عرض التمارين
+  document.getElementById("muscleTitle").textContent = muscle.name;
+  const list = document.getElementById("exerciseList");
+  list.innerHTML = "";
+  const wrap = document.createElement("div");
+  wrap.className = "exercise-list";
+  muscle.exercises.forEach(ex => {
+    const card = document.createElement("div");
+    const isSelected = dayP.exercises[muscleKey].includes(ex.name);
+    card.className = "exercise-card" + (isSelected ? " selected" : "");
+    card.innerHTML = `
+      <div class="head">
+        <div class="name">${ex.name}</div>
+        <div class="check">${isSelected ? "✓" : ""}</div>
+      </div>
+      <div class="meta"><span>${ex.sets}</span></div>
+      <div class="desc">${ex.desc}</div>
+    `;
+    card.onclick = () => toggleExercise(muscleKey, ex.name);
+    wrap.appendChild(card);
+  });
+
+  // زر إزالة العضلة
+  const removeBtn = document.createElement("button");
+  removeBtn.className = "btn secondary";
+  removeBtn.style.marginTop = "10px";
+  removeBtn.textContent = "🗑️ إزالة هذه العضلة من اليوم";
+  removeBtn.onclick = ()=> removeMuscle(muscleKey);
+
+  list.appendChild(wrap);
+  list.appendChild(removeBtn);
+}
+
+function toggleExercise(muscleKey, exName){
+  const dayP = state.program[state.currentDay];
+  const arr = dayP.exercises[muscleKey];
+  const i = arr.indexOf(exName);
+  if(i >= 0) arr.splice(i,1);
+  else arr.push(exName);
+  selectMuscle(muscleKey); // إعادة عرض القائمة
+}
+
+function removeMuscle(muscleKey){
+  const dayP = state.program[state.currentDay];
+  dayP.muscles = dayP.muscles.filter(m => m !== muscleKey);
+  delete dayP.exercises[muscleKey];
+  document.querySelectorAll(`#bodySvgContainer .muscle[data-muscle="${muscleKey}"]`).forEach(el=>el.classList.remove("selected"));
+  document.getElementById("muscleTitle").textContent = "اختر عضلة 👈";
+  document.getElementById("exerciseList").innerHTML = '<div class="hint">اضغط على عضلة في الرسم لرؤية التمارين</div>';
+}
+
+/* =========================================================
+   عرض البرنامج النهائي
+========================================================= */
+function renderProgram(){
+  const wrap = document.getElementById("programDisplay");
+  wrap.innerHTML = "";
+
+  // ملخص السعرات
+  if(state.calories){
+    const c = document.createElement("div");
+    c.className = "calorie-result";
+    c.style.marginBottom = "16px";
+    c.innerHTML = `
+      <div class="calorie-num">${state.calories.target}</div>
+      <div class="calorie-label">سعرة يومياً ${state.calories.goalLabel}</div>
+      <div class="calorie-grid">
+        <div class="calorie-mini"><div class="v">${state.calories.protein}غ</div><div class="l">بروتين</div></div>
+        <div class="calorie-mini"><div class="v">${state.calories.carbs}غ</div><div class="l">كارب</div></div>
+        <div class="calorie-mini"><div class="v">${state.calories.fat}غ</div><div class="l">دهون</div></div>
+      </div>
+    `;
+    wrap.appendChild(c);
+  }
+
+  if(state.selectedDays.length === 0){
+    wrap.innerHTML += '<div class="empty-msg">لم تختر أي يوم تدريب بعد.</div>';
+    return;
+  }
+
+  state.selectedDays.forEach(key => {
+    const d = DAYS.find(x=>x.key===key);
+    const p = state.program[key];
+    const day = document.createElement("div");
+    day.className = "program-day";
+
+    let muscleLabels = "(يوم راحة)";
+    if(p && p.muscles.length > 0){
+      muscleLabels = p.muscles.map(m => MUSCLES[m].name).join("، ");
+    }
+
+    let exHtml = "";
+    if(p){
+      p.muscles.forEach(m => {
+        const exs = p.exercises[m] || [];
+        exs.forEach(ex => {
+          const exObj = MUSCLES[m].exercises.find(e=>e.name===ex);
+          exHtml += `<div class="ex-item"><span class="nm">• ${ex}</span><span class="sr">${exObj? exObj.sets : ""}</span></div>`;
+        });
+      });
+    }
+    if(!exHtml) exHtml = '<div style="color:#64748b;font-size:13px;font-style:italic">لم تُختر تمارين</div>';
+
+    day.innerHTML = `
+      <h4>📅 ${d.name}</h4>
+      <div class="muscles-list">العضلات: ${muscleLabels}</div>
+      ${exHtml}
+    `;
+    wrap.appendChild(day);
+  });
+}
+
+/* =========================================================
+   التهيئة
+========================================================= */
+document.addEventListener("DOMContentLoaded", ()=>{
+  // استعادة من LocalStorage إن وُجد
+  try{
+    const saved = localStorage.getItem("gymApp");
+    if(saved){
+      const s = JSON.parse(saved);
+      Object.assign(state, s);
+      // تطبيق على الواجهة
+      if(state.user.gender) setGender(state.user.gender);
+      if(state.user.age) document.getElementById("age").value = state.user.age;
+      if(state.user.height) document.getElementById("height").value = state.user.height;
+      if(state.user.weight) document.getElementById("weight").value = state.user.weight;
+      if(state.user.activity) document.getElementById("activity").value = state.user.activity;
+      if(state.user.goal) document.getElementById("goal").value = state.user.goal;
+    }
+  }catch(e){}
+});
+
+// حفظ تلقائي كل تغيير
+window.addEventListener("beforeunload", ()=>{
+  try{ localStorage.setItem("gymApp", JSON.stringify(state)); }catch(e){}
+});
+setInterval(()=>{
+  try{ localStorage.setItem("gymApp", JSON.stringify(state)); }catch(e){}
+}, 5000);
+</script>
+</body>
+</html>
