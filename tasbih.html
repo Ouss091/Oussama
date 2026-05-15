@@ -309,7 +309,7 @@
     notes.forEach((f,i) => setTimeout(()=>tone(f, 0.3, "triangle", 0.22), i*150));
   }
 
-  // نطق الذكر
+  // نطق الذكر بصوت رجل
   function speakDhikr(text){
     if(!state.audioEnabled) return;
     if(!("speechSynthesis" in window)) return;
@@ -317,12 +317,42 @@
       window.speechSynthesis.cancel();
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "ar-SA";
-      u.rate = 0.9;
-      u.pitch = 1;
+      u.rate = 0.85;
+      u.pitch = 0.7;   // طبقة منخفضة = صوت رجل
       u.volume = 1;
+
       const voices = window.speechSynthesis.getVoices();
-      const arVoice = voices.find(v => v.lang && v.lang.startsWith("ar"));
-      if(arVoice) u.voice = arVoice;
+      // كلمات مفتاحية للأصوات الرجالية المعروفة
+      const maleKeywords = [
+        "male", "homme", "rajul", "majed", "naayf", "hamed", "tarik",
+        "salim", "khaled", "majeed", "abdul", "masoud", "wael", "ali"
+      ];
+      // كلمات مفتاحية لاستبعاد الأصوات النسائية
+      const femaleKeywords = ["female", "femme", "woman", "amira", "sara", "laila", "nada", "zahra", "hala", "salma"];
+
+      // 1) نبحث عن صوت عربي رجالي صراحة
+      let chosen = voices.find(v => {
+        if(!v.lang || !v.lang.toLowerCase().startsWith("ar")) return false;
+        const n = (v.name||"").toLowerCase();
+        if(femaleKeywords.some(k => n.includes(k))) return false;
+        return maleKeywords.some(k => n.includes(k));
+      });
+
+      // 2) إن لم نجد، نأخذ أي صوت عربي ليس فيه إشارة لأنه نسائي
+      if(!chosen){
+        chosen = voices.find(v => {
+          if(!v.lang || !v.lang.toLowerCase().startsWith("ar")) return false;
+          const n = (v.name||"").toLowerCase();
+          return !femaleKeywords.some(k => n.includes(k));
+        });
+      }
+
+      // 3) آخر حلّ: أي صوت عربي
+      if(!chosen){
+        chosen = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
+      }
+
+      if(chosen) u.voice = chosen;
       window.speechSynthesis.speak(u);
     }catch(e){}
   }
