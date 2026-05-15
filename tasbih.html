@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>📿 تسبيح بعد الصلاة</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:#000;min-height:100vh;color:#f5f5f5;
+    overflow-x:hidden;
+    user-select:none;
+  }
+
+  /* الشاشة الرئيسية */
+  .screen{
+    min-height:100vh;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    padding:20px;text-align:center;
+    position:relative;
+  }
+
+  /* مرحلة التسبيح (السبحان/الحمد/الأكبر) */
+  .stage-info{
+    color:#94a3b8;font-size:18px;font-weight:700;margin-bottom:20px;
+    display:flex;gap:8px;align-items:center;
+  }
+  .stage-dot{
+    width:12px;height:12px;border-radius:50%;background:#1f1f1f;
+    border:2px solid #374151;
+  }
+  .stage-dot.active{background:#fbbf24;border-color:#fbbf24;box-shadow:0 0 12px rgba(251,191,36,.5)}
+  .stage-dot.done{background:#22c55e;border-color:#22c55e}
+
+  /* الذكر */
+  .dhikr{
+    font-size:64px;font-weight:900;color:#fbbf24;
+    margin:30px 0;
+    line-height:1.4;
+    text-shadow:0 0 30px rgba(251,191,36,.3);
+    transition:transform .15s;
+  }
+  .dhikr.pulse{animation:pulse .3s ease}
+  @keyframes pulse{
+    0%{transform:scale(1)}
+    50%{transform:scale(1.1)}
+    100%{transform:scale(1)}
+  }
+
+  /* العدّاد */
+  .counter-wrap{
+    position:relative;
+    width:280px;height:280px;
+    margin:20px 0;
+    cursor:pointer;
+  }
+  .counter-svg{width:100%;height:100%;transform:rotate(-90deg)}
+  .counter-bg{fill:none;stroke:#1f1f1f;stroke-width:8}
+  .counter-fg{
+    fill:none;stroke:#fbbf24;stroke-width:8;stroke-linecap:round;
+    stroke-dasharray:803.84;stroke-dashoffset:803.84;
+    transition:stroke-dashoffset .4s ease, stroke .3s;
+  }
+  .counter-fg.green{stroke:#22c55e}
+  .counter-fg.blue{stroke:#3b82f6}
+
+  .counter-text{
+    position:absolute;inset:0;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .counter-num{
+    font-size:96px;font-weight:900;color:#f5f5f5;line-height:1;
+    transition:transform .15s, color .3s;
+  }
+  .counter-num.pulse{animation:numPulse .25s ease}
+  @keyframes numPulse{
+    0%{transform:scale(1);color:#f5f5f5}
+    50%{transform:scale(1.2);color:#fbbf24}
+    100%{transform:scale(1);color:#f5f5f5}
+  }
+  .counter-total{color:#64748b;font-size:18px;margin-top:6px;font-weight:700}
+
+  .tap-hint{
+    color:#64748b;font-size:14px;margin-top:10px;font-style:italic;
+  }
+
+  /* أزرار التحكم */
+  .controls{
+    display:flex;gap:10px;margin-top:30px;flex-wrap:wrap;justify-content:center;
+  }
+  .btn{
+    border:0;border-radius:14px;padding:14px 22px;font-size:16px;font-weight:800;
+    cursor:pointer;transition:all .15s;font-family:inherit;
+    display:inline-flex;align-items:center;gap:8px;
+  }
+  .btn.primary{background:#fbbf24;color:#111}
+  .btn.primary:hover{background:#f59e0b}
+  .btn.secondary{background:#1f1f1f;color:#e5e7eb;border:1px solid #374151}
+  .btn.secondary:hover{background:#2a2a2a}
+  .btn.danger{background:#7f1d1d;color:#fca5a5;border:1px solid #991b1b}
+  .btn.danger:hover{background:#991b1b}
+  .btn.success{background:#22c55e;color:#fff}
+  .btn.success:hover{background:#16a34a}
+
+  /* شاشة الانتهاء */
+  .final-screen{
+    background:radial-gradient(circle at center,#1a1a2e 0%,#000 70%);
+  }
+  .final-icon{
+    font-size:80px;line-height:1;
+    animation:glow 2s ease infinite alternate;
+  }
+  @keyframes glow{
+    from{filter:drop-shadow(0 0 10px #fbbf24)}
+    to{filter:drop-shadow(0 0 30px #fbbf24)}
+  }
+  .final-dhikr{
+    font-size:32px;font-weight:900;color:#fbbf24;
+    line-height:1.8;
+    max-width:700px;margin:30px auto;
+    text-shadow:0 0 20px rgba(251,191,36,.4);
+    padding:20px;
+  }
+  .final-msg{
+    color:#22c55e;font-size:22px;font-weight:800;margin-top:20px;
+  }
+
+  /* شاشة الترحيب */
+  .welcome-screen{
+    background:radial-gradient(circle at center,#0a0a0a 0%,#000 70%);
+  }
+  .welcome-icon{font-size:90px;margin-bottom:20px}
+  .welcome-title{
+    font-size:36px;font-weight:900;color:#fbbf24;margin-bottom:14px;
+    text-shadow:0 0 20px rgba(251,191,36,.3);
+  }
+  .welcome-subtitle{
+    color:#94a3b8;font-size:18px;margin-bottom:30px;line-height:1.7;
+    max-width:500px;
+  }
+
+  .audio-toggle{
+    display:inline-flex;align-items:center;gap:10px;
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:12px;
+    padding:12px 18px;cursor:pointer;font-size:15px;font-weight:700;
+    color:#e5e7eb;margin-bottom:20px;
+    transition:all .2s;
+  }
+  .audio-toggle:hover{border-color:#fbbf24}
+  .audio-toggle.active{
+    background:#1c1917;border-color:#fbbf24;color:#fbbf24;
+  }
+  .audio-toggle .icon{font-size:20px}
+
+  /* شريط التقدم العام */
+  .progress-bar{
+    position:fixed;top:0;left:0;height:4px;background:#fbbf24;
+    transition:width .3s ease;
+    box-shadow:0 0 10px #fbbf24;
+    z-index:100;
+  }
+
+  footer{
+    text-align:center;color:#475569;padding:16px;font-size:13px;
+    border-top:1px solid #1f1f1f;margin-top:20px;
+  }
+
+  @media(max-width:480px){
+    .dhikr{font-size:48px}
+    .counter-wrap{width:240px;height:240px}
+    .counter-num{font-size:72px}
+    .welcome-title{font-size:28px}
+    .final-dhikr{font-size:22px}
+  }
+</style>
+</head>
+<body>
+
+<div class="progress-bar" id="progressBar" style="width:0%"></div>
+
+<!-- شاشة الترحيب -->
+<div class="screen welcome-screen" id="welcomeScreen">
+  <div class="welcome-icon">📿</div>
+  <h1 class="welcome-title">تسبيح بعد الصلاة</h1>
+  <p class="welcome-subtitle">
+    تقبّل الله صلاتك 🤲<br>
+    اضغط على الزر للبدء في التسبيح:<br>
+    <strong>سبحان الله × 33</strong> →
+    <strong>الحمد لله × 33</strong> →
+    <strong>الله أكبر × 33</strong>
+  </p>
+
+  <div class="audio-toggle" id="audioToggle" onclick="toggleAudio()">
+    <span class="icon">🔊</span>
+    <span>تشغيل الصوت: <strong id="audioStatus">مفعّل</strong></span>
+  </div>
+
+  <div class="controls">
+    <button class="btn primary" onclick="startTasbih()">
+      ▶️ ابدأ التسبيح
+    </button>
+  </div>
+</div>
+
+<!-- شاشة التسبيح -->
+<div class="screen" id="tasbihScreen" style="display:none">
+  <div class="stage-info">
+    <span id="stageDot1" class="stage-dot active"></span>
+    <span id="stageDot2" class="stage-dot"></span>
+    <span id="stageDot3" class="stage-dot"></span>
+    <span style="margin-right:10px" id="stageLabel">المرحلة 1 من 3</span>
+  </div>
+
+  <div class="dhikr" id="dhikrText">سبحان الله</div>
+
+  <div class="counter-wrap" id="counterWrap" onclick="incrementCount()">
+    <svg viewBox="0 0 280 280" class="counter-svg">
+      <circle cx="140" cy="140" r="128" class="counter-bg"></circle>
+      <circle cx="140" cy="140" r="128" class="counter-fg" id="counterFg"></circle>
+    </svg>
+    <div class="counter-text">
+      <div class="counter-num" id="counterNum">0</div>
+      <div class="counter-total">/ 33</div>
+    </div>
+  </div>
+
+  <div class="tap-hint">👆 اضغط على الدائرة للعدّ</div>
+
+  <div class="controls">
+    <button class="btn secondary" onclick="resetCurrent()">🔄 إعادة</button>
+    <button class="btn danger" onclick="exitTasbih()">✕ خروج</button>
+  </div>
+</div>
+
+<!-- شاشة الانتهاء -->
+<div class="screen final-screen" id="finalScreen" style="display:none">
+  <div class="final-icon">🤲</div>
+  <div class="final-dhikr">
+    لا إله إلا الله وحده لا شريك له،<br>
+    له الملك وله الحمد،<br>
+    يحيي ويميت وهو على كل شيء قدير
+  </div>
+  <div class="final-msg">✓ تقبّل الله منك</div>
+
+  <div class="controls">
+    <button class="btn primary" onclick="speakFinal()">🔊 استماع</button>
+    <button class="btn success" onclick="restartAll()">🔄 تسبيح جديد</button>
+  </div>
+</div>
+
+<footer>📿 تطبيق التسبيح — تقبّل الله طاعتك 🤲</footer>
+
+<script>
+  // ============= الحالة =============
+  const STAGES = [
+    { dhikr: "سبحان الله", target: 33, color: "#fbbf24", fgClass: "" },
+    { dhikr: "الحمد لله", target: 33, color: "#22c55e", fgClass: "green" },
+    { dhikr: "الله أكبر", target: 33, color: "#3b82f6", fgClass: "blue" }
+  ];
+  const FINAL_DUA = "لا إله إلا الله وحده لا شريك له، له الملك وله الحمد، يحيي ويميت وهو على كل شيء قدير";
+  const CIRC = 2 * Math.PI * 128; // محيط الدائرة
+
+  let state = {
+    stageIndex: 0,
+    count: 0,
+    audioEnabled: true
+  };
+
+  // ============= الصوت =============
+  let audioCtx = null;
+  function ac(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tone(freq, duration=0.1, type="sine", gain=0.15){
+    if(!state.audioEnabled) return;
+    try{
+      const ctx=ac();
+      const osc=ctx.createOscillator();
+      const g=ctx.createGain();
+      osc.type=type; osc.frequency.value=freq;
+      g.gain.value=gain;
+      osc.connect(g).connect(ctx.destination);
+      osc.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+duration);
+      osc.stop(ctx.currentTime+duration+0.02);
+    }catch(e){}
+  }
+
+  // صوت "تك" خفيف عند الضغط
+  function clickSound(){
+    tone(800, 0.05, "sine", 0.1);
+  }
+
+  // صوت إنجاز المرحلة (لحن قصير)
+  function stageCompleteSound(){
+    if(!state.audioEnabled) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5];
+    notes.forEach((f,i) => setTimeout(()=>tone(f, 0.2, "triangle", 0.2), i*120));
+  }
+
+  // صوت الانتهاء النهائي
+  function finalSound(){
+    if(!state.audioEnabled) return;
+    const notes = [523.25, 659.25, 783.99, 1046.5, 1318.51];
+    notes.forEach((f,i) => setTimeout(()=>tone(f, 0.3, "triangle", 0.22), i*150));
+  }
+
+  // نطق الذكر
+  function speakDhikr(text){
+    if(!state.audioEnabled) return;
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance(text);
+      u.lang = "ar-SA";
+      u.rate = 0.9;
+      u.pitch = 1;
+      u.volume = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const arVoice = voices.find(v => v.lang && v.lang.startsWith("ar"));
+      if(arVoice) u.voice = arVoice;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged = ()=>{};
+  }
+
+  // ============= التحكم =============
+  function toggleAudio(){
+    state.audioEnabled = !state.audioEnabled;
+    const toggle = document.getElementById("audioToggle");
+    const status = document.getElementById("audioStatus");
+    if(state.audioEnabled){
+      toggle.classList.add("active");
+      status.textContent = "مفعّل";
+      toggle.querySelector(".icon").textContent = "🔊";
+    }else{
+      toggle.classList.remove("active");
+      status.textContent = "متوقف";
+      toggle.querySelector(".icon").textContent = "🔇";
+    }
+    // حفظ الإعداد
+    try{ localStorage.setItem("tasbihAudio", state.audioEnabled ? "1" : "0"); }catch(e){}
+  }
+
+  function startTasbih(){
+    ac(); // تفعيل الصوت
+    document.getElementById("welcomeScreen").style.display = "none";
+    document.getElementById("tasbihScreen").style.display = "flex";
+    state.stageIndex = 0;
+    state.count = 0;
+    updateUI();
+  }
+
+  function exitTasbih(){
+    document.getElementById("tasbihScreen").style.display = "none";
+    document.getElementById("finalScreen").style.display = "none";
+    document.getElementById("welcomeScreen").style.display = "flex";
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }
+
+  function resetCurrent(){
+    state.count = 0;
+    updateUI();
+  }
+
+  function incrementCount(){
+    if(state.count >= STAGES[state.stageIndex].target) return;
+    state.count++;
+    clickSound();
+
+    // نطق الذكر مع كل ضغطة (يمكن تعطيله إذا أصبح ثقيلاً)
+    // نكتفي بالنطق عند الضغطة الأولى من كل مرحلة لتجنب التداخل
+    if(state.count === 1){
+      speakDhikr(STAGES[state.stageIndex].dhikr);
+    }
+
+    // أنيميشن نبضة على الذكر والرقم
+    const dhikrEl = document.getElementById("dhikrText");
+    const numEl = document.getElementById("counterNum");
+    dhikrEl.classList.remove("pulse"); void dhikrEl.offsetWidth; dhikrEl.classList.add("pulse");
+    numEl.classList.remove("pulse"); void numEl.offsetWidth; numEl.classList.add("pulse");
+
+    updateUI();
+
+    // عند بلوغ 33
+    if(state.count >= STAGES[state.stageIndex].target){
+      stageCompleteSound();
+      setTimeout(() => {
+        if(state.stageIndex < STAGES.length - 1){
+          // الانتقال للمرحلة التالية
+          state.stageIndex++;
+          state.count = 0;
+          updateUI();
+          // نطق الذكر الجديد
+          setTimeout(() => speakDhikr(STAGES[state.stageIndex].dhikr), 300);
+        }else{
+          // انتهاء كل المراحل → الشاشة النهائية
+          showFinalScreen();
+        }
+      }, 800);
+    }
+  }
+
+  function updateUI(){
+    const stage = STAGES[state.stageIndex];
+    const dhikrEl = document.getElementById("dhikrText");
+    const numEl = document.getElementById("counterNum");
+    const fgEl = document.getElementById("counterFg");
+    const labelEl = document.getElementById("stageLabel");
+    const progressEl = document.getElementById("progressBar");
+
+    // النصوص
+    dhikrEl.textContent = stage.dhikr;
+    dhikrEl.style.color = stage.color;
+    dhikrEl.style.textShadow = `0 0 30px ${stage.color}55`;
+    numEl.textContent = state.count;
+    labelEl.textContent = `المرحلة ${state.stageIndex + 1} من 3`;
+
+    // الدائرة
+    const ratio = state.count / stage.target;
+    fgEl.style.strokeDashoffset = (CIRC * (1 - ratio)).toFixed(2);
+    fgEl.classList.remove("green", "blue");
+    if(stage.fgClass) fgEl.classList.add(stage.fgClass);
+
+    // النقاط (الـ dots)
+    for(let i=0; i<3; i++){
+      const dot = document.getElementById("stageDot" + (i+1));
+      dot.classList.remove("active", "done");
+      if(i < state.stageIndex) dot.classList.add("done");
+      else if(i === state.stageIndex) dot.classList.add("active");
+    }
+
+    // شريط التقدم العام
+    const totalSteps = STAGES.length * 33;
+    const currentStep = state.stageIndex * 33 + state.count;
+    progressEl.style.width = ((currentStep/totalSteps)*100) + "%";
+  }
+
+  function showFinalScreen(){
+    document.getElementById("tasbihScreen").style.display = "none";
+    document.getElementById("finalScreen").style.display = "flex";
+    document.getElementById("progressBar").style.width = "100%";
+    finalSound();
+    setTimeout(() => speakDhikr(FINAL_DUA), 800);
+  }
+
+  function speakFinal(){
+    speakDhikr(FINAL_DUA);
+  }
+
+  function restartAll(){
+    state.stageIndex = 0;
+    state.count = 0;
+    document.getElementById("finalScreen").style.display = "none";
+    document.getElementById("tasbihScreen").style.display = "flex";
+    document.getElementById("progressBar").style.width = "0%";
+    updateUI();
+    setTimeout(() => speakDhikr(STAGES[0].dhikr), 300);
+  }
+
+  // ============= بدء التشغيل =============
+  document.addEventListener("DOMContentLoaded", () => {
+    // استعادة إعداد الصوت
+    try{
+      const saved = localStorage.getItem("tasbihAudio");
+      if(saved !== null){
+        state.audioEnabled = saved === "1";
+      }
+    }catch(e){}
+    // تطبيق حالة الصوت على الواجهة
+    const toggle = document.getElementById("audioToggle");
+    const status = document.getElementById("audioStatus");
+    if(state.audioEnabled){
+      toggle.classList.add("active");
+      status.textContent = "مفعّل";
+    }else{
+      status.textContent = "متوقف";
+      toggle.querySelector(".icon").textContent = "🔇";
+    }
+  });
+
+  // دعم زر الصوت في لوحة المفاتيح للتجربة على الحاسوب
+  document.addEventListener("keydown", (e) => {
+    if(e.code === "Space" && document.getElementById("tasbihScreen").style.display === "flex"){
+      e.preventDefault();
+      incrementCount();
+    }
+  });
+</script>
+</body>
+</html>
