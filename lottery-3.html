@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>🎲 قرعة بين 3 أشخاص</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+  body{
+    font-family:"Segoe UI",Tahoma,Arial,sans-serif;
+    background:#000;min-height:100vh;color:#f5f5f5;padding:16px;
+    overflow-x:hidden;user-select:none;
+  }
+  .app{max-width:700px;margin:0 auto}
+
+  header{
+    text-align:center;padding:20px;background:#0a0a0a;border:1px solid #1f1f1f;
+    border-radius:20px;margin-bottom:20px;
+  }
+  header h1{font-size:28px;color:#fbbf24;margin-bottom:8px}
+  header p{color:#94a3b8;font-size:15px;line-height:1.6}
+
+  /* بطاقات الثلاثة */
+  .cards{
+    display:grid;grid-template-columns:repeat(3,1fr);gap:12px;
+    margin-bottom:20px;
+  }
+  .person-card{
+    padding:30px 12px;border-radius:18px;text-align:center;
+    border:3px solid;
+    transition:all .3s ease;
+    position:relative;overflow:hidden;
+  }
+  .person-card .name{
+    font-size:22px;font-weight:900;line-height:1.4;
+    position:relative;z-index:2;
+  }
+  .person-card .icon{font-size:42px;margin-bottom:6px;display:block}
+
+  /* الألوان لكل شخص */
+  .card-1{background:linear-gradient(135deg,#7f1d1d 0%,#ef4444 100%);border-color:#ef4444;color:#fff}
+  .card-2{background:linear-gradient(135deg,#14532d 0%,#22c55e 100%);border-color:#22c55e;color:#fff}
+  .card-3{background:linear-gradient(135deg,#1e3a8a 0%,#3b82f6 100%);border-color:#3b82f6;color:#fff}
+
+  /* أنيميشن: البطاقة المُضاءة أثناء الدوران */
+  .person-card.highlight{
+    transform:scale(1.08);
+    box-shadow:0 0 40px currentColor;
+    z-index:5;
+  }
+  .person-card.dim{opacity:.3;transform:scale(.95)}
+  .person-card.winner{
+    transform:scale(1.15);
+    box-shadow:0 0 60px #fbbf24, 0 0 100px #fbbf24;
+    border-color:#fbbf24;
+    animation:winnerPulse .8s ease infinite alternate;
+  }
+  @keyframes winnerPulse{
+    from{transform:scale(1.1);filter:brightness(1)}
+    to{transform:scale(1.2);filter:brightness(1.3)}
+  }
+
+  /* منطقة الفائز */
+  .winner-area{
+    background:#0a0a0a;border:2px solid #1f1f1f;border-radius:20px;
+    padding:30px 20px;text-align:center;margin-bottom:20px;
+    min-height:200px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+  }
+  .winner-area.has-winner{
+    border-color:#fbbf24;
+    background:radial-gradient(circle at center,#1c1917 0%,#000 70%);
+    box-shadow:0 0 30px rgba(251,191,36,.2);
+  }
+  .winner-label{color:#94a3b8;font-size:16px;font-weight:700;margin-bottom:8px}
+  .winner-name{
+    font-size:48px;font-weight:900;color:#fbbf24;
+    text-shadow:0 0 20px #fbbf24;
+    line-height:1.4;
+  }
+  .winner-name.spinning{
+    animation:spinName .15s linear infinite;
+    color:#94a3b8;
+    text-shadow:none;
+    font-size:36px;
+  }
+  @keyframes spinName{
+    0%{opacity:1;transform:translateY(0)}
+    50%{opacity:.4;transform:translateY(-3px)}
+    100%{opacity:1;transform:translateY(0)}
+  }
+  .winner-trophy{font-size:60px;animation:bounce .8s ease infinite alternate}
+  @keyframes bounce{to{transform:translateY(-10px) rotate(-5deg)}}
+
+  /* زر القرعة */
+  .spin-btn{
+    width:100%;padding:22px;font-size:24px;font-weight:900;
+    border:none;border-radius:18px;cursor:pointer;
+    background:linear-gradient(135deg,#fbbf24,#f59e0b);
+    color:#111;font-family:inherit;
+    box-shadow:0 4px 30px rgba(251,191,36,.3);
+    transition:all .15s;
+  }
+  .spin-btn:hover{transform:translateY(-2px);box-shadow:0 8px 40px rgba(251,191,36,.5)}
+  .spin-btn:active{transform:translateY(0)}
+  .spin-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+
+  .actions{
+    display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;justify-content:center;
+  }
+  .btn{
+    padding:12px 18px;border-radius:12px;border:1px solid #374151;
+    background:#1f1f1f;color:#e5e7eb;font-weight:700;font-size:15px;
+    cursor:pointer;font-family:inherit;
+  }
+  .btn:hover{background:#2a2a2a;border-color:#fbbf24}
+
+  /* الكنفيتي (احتفال) */
+  .confetti{
+    position:fixed;width:10px;height:10px;
+    pointer-events:none;z-index:1000;
+    animation:fall 2.5s linear forwards;
+  }
+  @keyframes fall{
+    0%{transform:translateY(-100vh) rotate(0deg);opacity:1}
+    100%{transform:translateY(100vh) rotate(720deg);opacity:0}
+  }
+
+  footer{text-align:center;color:#475569;padding:16px;font-size:13px;margin-top:10px}
+
+  @media(max-width:480px){
+    .person-card .name{font-size:16px}
+    .person-card .icon{font-size:32px}
+    .winner-name{font-size:36px}
+    .spin-btn{font-size:20px;padding:18px}
+    header h1{font-size:22px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🎲 القرعة بين 3 أشخاص</h1>
+    <p>اضغط على زر <strong>القرعة</strong> ليتم اختيار شخص عشوائياً مع صوت وألوان احتفالية! 🎉</p>
+  </header>
+
+  <!-- البطاقات الثلاث -->
+  <div class="cards">
+    <div class="person-card card-1" id="card0">
+      <span class="icon">🔴</span>
+      <div class="name">أسامة</div>
+    </div>
+    <div class="person-card card-2" id="card1">
+      <span class="icon">🟢</span>
+      <div class="name">زكرياء</div>
+    </div>
+    <div class="person-card card-3" id="card2">
+      <span class="icon">🔵</span>
+      <div class="name">أنيس</div>
+    </div>
+  </div>
+
+  <!-- منطقة الفائز -->
+  <div class="winner-area" id="winnerArea">
+    <div class="winner-label">🎯 الفائز:</div>
+    <div class="winner-name" id="winnerName">؟</div>
+  </div>
+
+  <!-- زر القرعة -->
+  <button class="spin-btn" id="spinBtn" onclick="spin()">
+    🎲 ابدأ القرعة
+  </button>
+
+  <div class="actions">
+    <button class="btn" onclick="resetAll()">🔄 إعادة</button>
+    <button class="btn" onclick="speakWinner()">🔊 إعادة النطق</button>
+  </div>
+
+  <footer>🎉 قرعة عشوائية — حظاً سعيداً للجميع</footer>
+</div>
+
+<script>
+  // الأسماء والألوان
+  const PEOPLE = [
+    { name: "أسامة",  color: "#ef4444", emoji: "🏆" },
+    { name: "زكرياء", color: "#22c55e", emoji: "🏆" },
+    { name: "أنيس",   color: "#3b82f6", emoji: "🏆" }
+  ];
+
+  let isSpinning = false;
+  let lastWinner = null;
+
+  // ============= الصوت =============
+  let audioCtx = null;
+  function ac(){
+    if(!audioCtx) audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    return audioCtx;
+  }
+
+  function tone(freq, dur=0.15, type="sine", gain=0.18){
+    try{
+      const ctx=ac();
+      const osc=ctx.createOscillator();
+      const g=ctx.createGain();
+      osc.type=type; osc.frequency.value=freq;
+      g.gain.value=gain;
+      osc.connect(g).connect(ctx.destination);
+      osc.start();
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime+dur);
+      osc.stop(ctx.currentTime+dur+0.02);
+    }catch(e){}
+  }
+
+  // صوت طبل (إثارة)
+  function drumRoll(){
+    const ctx=ac();
+    for(let i=0;i<14;i++){
+      setTimeout(()=>{
+        const bs=ctx.sampleRate*0.04;
+        const buf=ctx.createBuffer(1,bs,ctx.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let j=0;j<bs;j++) d[j]=(Math.random()*2-1)*(1-j/bs);
+        const src=ctx.createBufferSource(); src.buffer=buf;
+        const g=ctx.createGain(); g.gain.value=0.22;
+        src.connect(g).connect(ctx.destination);
+        src.start();
+      }, i*120);
+    }
+  }
+
+  // فانفير فوز (تصاعدي + تصفيق)
+  function fanfareSound(){
+    const notes=[523.25, 659.25, 783.99, 1046.5, 1318.51];
+    notes.forEach((f,i)=>setTimeout(()=>tone(f, 0.25, "triangle", 0.25), i*130));
+    setTimeout(clapBurst, 700);
+  }
+
+  function clapBurst(){
+    const ctx=ac();
+    for(let i=0;i<7;i++){
+      setTimeout(()=>{
+        const bs=ctx.sampleRate*0.08;
+        const buf=ctx.createBuffer(1,bs,ctx.sampleRate);
+        const d=buf.getChannelData(0);
+        for(let j=0;j<bs;j++) d[j]=(Math.random()*2-1)*(1-j/bs);
+        const src=ctx.createBufferSource(); src.buffer=buf;
+        const g=ctx.createGain(); g.gain.value=0.35;
+        const fl=ctx.createBiquadFilter(); fl.type="bandpass"; fl.frequency.value=2000;
+        src.connect(fl).connect(g).connect(ctx.destination);
+        src.start();
+      }, i*100);
+    }
+  }
+
+  function tickSound(){ tone(900, 0.04, "square", 0.1); }
+
+  // نطق الاسم
+  function speakName(name){
+    if(!("speechSynthesis" in window)) return;
+    try{
+      window.speechSynthesis.cancel();
+      const u = new SpeechSynthesisUtterance("الفائز هو " + name);
+      u.lang = "ar-SA";
+      u.rate = 0.85;
+      u.pitch = 1.05;
+      u.volume = 1;
+      const voices = window.speechSynthesis.getVoices();
+      const ar = voices.find(v => v.lang && v.lang.startsWith("ar"));
+      if(ar) u.voice = ar;
+      window.speechSynthesis.speak(u);
+    }catch(e){}
+  }
+
+  // ============= الكنفيتي (احتفال) =============
+  function launchConfetti(){
+    const colors = ["#ef4444", "#22c55e", "#3b82f6", "#fbbf24", "#ec4899", "#a855f7"];
+    for(let i=0; i<60; i++){
+      setTimeout(()=>{
+        const c = document.createElement("div");
+        c.className = "confetti";
+        c.style.left = Math.random()*100 + "vw";
+        c.style.background = colors[Math.floor(Math.random()*colors.length)];
+        c.style.animationDuration = (1.5 + Math.random()*1.5) + "s";
+        c.style.width = (6 + Math.random()*8) + "px";
+        c.style.height = c.style.width;
+        if(Math.random() > 0.5) c.style.borderRadius = "50%";
+        document.body.appendChild(c);
+        setTimeout(()=>c.remove(), 3500);
+      }, i*30);
+    }
+  }
+
+  // ============= القرعة =============
+  function spin(){
+    if(isSpinning) return;
+    ac(); // تفعيل الصوت
+    isSpinning = true;
+    document.getElementById("spinBtn").disabled = true;
+
+    // تنظيف الحالة السابقة
+    const winnerName = document.getElementById("winnerName");
+    const winnerArea = document.getElementById("winnerArea");
+    winnerArea.classList.remove("has-winner");
+    winnerName.classList.add("spinning");
+    PEOPLE.forEach((_, i) => {
+      const card = document.getElementById("card" + i);
+      card.classList.remove("highlight", "dim", "winner");
+    });
+
+    drumRoll();
+
+    // أنيميشن: تنقّل بين البطاقات الثلاث بسرعة
+    let current = 0;
+    let speed = 100; // ms
+    let elapsed = 0;
+    const totalTime = 2800; // مدة القرعة الإجمالية
+
+    function step(){
+      // إزالة الإضاءة من الكل
+      PEOPLE.forEach((_, i) => {
+        document.getElementById("card" + i).classList.remove("highlight");
+      });
+      // إضاءة الحالية
+      document.getElementById("card" + current).classList.add("highlight");
+      winnerName.textContent = PEOPLE[current].name;
+      tickSound();
+
+      current = (current + 1) % PEOPLE.length;
+      elapsed += speed;
+
+      if(elapsed < totalTime){
+        // إبطاء تدريجي مع اقتراب النهاية
+        if(elapsed > totalTime * 0.6) speed += 30;
+        else if(elapsed > totalTime * 0.4) speed += 15;
+        setTimeout(step, speed);
+      } else {
+        // الاختيار النهائي
+        const winnerIdx = Math.floor(Math.random() * PEOPLE.length);
+        finalizeWinner(winnerIdx);
+      }
+    }
+
+    setTimeout(step, speed);
+  }
+
+  function finalizeWinner(idx){
+    const winner = PEOPLE[idx];
+    lastWinner = winner;
+    const winnerName = document.getElementById("winnerName");
+    const winnerArea = document.getElementById("winnerArea");
+
+    // تنظيف
+    winnerName.classList.remove("spinning");
+    PEOPLE.forEach((_, i) => {
+      const card = document.getElementById("card" + i);
+      card.classList.remove("highlight");
+      if(i === idx){
+        card.classList.add("winner");
+      } else {
+        card.classList.add("dim");
+      }
+    });
+
+    // عرض الفائز
+    winnerName.textContent = "🏆 " + winner.name + " 🏆";
+    winnerArea.classList.add("has-winner");
+
+    // الأصوات والاحتفال
+    fanfareSound();
+    launchConfetti();
+    setTimeout(() => speakName(winner.name), 600);
+
+    isSpinning = false;
+    document.getElementById("spinBtn").disabled = false;
+    document.getElementById("spinBtn").textContent = "🎲 قرعة جديدة";
+  }
+
+  function resetAll(){
+    if(isSpinning) return;
+    PEOPLE.forEach((_, i) => {
+      const card = document.getElementById("card" + i);
+      card.classList.remove("highlight", "dim", "winner");
+    });
+    document.getElementById("winnerName").textContent = "؟";
+    document.getElementById("winnerArea").classList.remove("has-winner");
+    document.getElementById("spinBtn").textContent = "🎲 ابدأ القرعة";
+    lastWinner = null;
+    if("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }
+
+  function speakWinner(){
+    if(lastWinner){
+      ac();
+      speakName(lastWinner.name);
+    }
+  }
+
+  // تفعيل التحميل
+  if("speechSynthesis" in window){
+    window.speechSynthesis.onvoiceschanged = ()=>{};
+  }
+</script>
+</body>
+</html>
