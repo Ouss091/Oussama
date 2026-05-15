@@ -144,7 +144,7 @@
     display:inline-flex;align-items:center;gap:10px;
     background:#0a0a0a;border:1px solid #1f1f1f;border-radius:12px;
     padding:12px 18px;cursor:pointer;font-size:15px;font-weight:700;
-    color:#e5e7eb;margin-bottom:20px;
+    color:#e5e7eb;margin-bottom:14px;
     transition:all .2s;
   }
   .audio-toggle:hover{border-color:#fbbf24}
@@ -152,6 +152,46 @@
     background:#1c1917;border-color:#fbbf24;color:#fbbf24;
   }
   .audio-toggle .icon{font-size:20px}
+
+  /* اختيار الصوت */
+  .voice-picker{
+    background:#0a0a0a;border:1px solid #1f1f1f;border-radius:12px;
+    padding:14px 18px;margin-bottom:20px;
+    width:100%;max-width:400px;
+  }
+  .voice-picker label{
+    display:block;color:#94a3b8;font-size:13px;font-weight:700;
+    margin-bottom:8px;text-align:start;
+  }
+  .voice-picker select{
+    width:100%;padding:10px 14px;border-radius:10px;
+    background:#111;color:#fbbf24;border:1px solid #374151;
+    font-size:15px;font-weight:700;font-family:inherit;
+    cursor:pointer;
+  }
+  .voice-picker select:focus{outline:none;border-color:#fbbf24}
+  .voice-picker .test-row{
+    display:flex;gap:8px;margin-top:10px;
+  }
+  .voice-picker .test-btn{
+    flex:1;padding:8px 12px;border-radius:8px;
+    background:#1f1f1f;color:#e5e7eb;border:1px solid #374151;
+    font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;
+  }
+  .voice-picker .test-btn:hover{background:#2a2a2a;border-color:#fbbf24}
+  .voice-picker .hint{
+    color:#64748b;font-size:12px;margin-top:8px;line-height:1.5;text-align:start;
+  }
+  .pitch-row{
+    display:flex;align-items:center;gap:10px;margin-top:10px;
+  }
+  .pitch-row label{margin:0;flex-shrink:0}
+  .pitch-row input[type=range]{
+    flex:1;accent-color:#fbbf24;
+  }
+  .pitch-value{
+    color:#fbbf24;font-weight:900;font-size:14px;min-width:30px;text-align:center;
+  }
 
   /* شريط التقدم العام */
   .progress-bar{
@@ -194,6 +234,26 @@
   <div class="audio-toggle" id="audioToggle" onclick="toggleAudio()">
     <span class="icon">🔊</span>
     <span>تشغيل الصوت: <strong id="audioStatus">مفعّل</strong></span>
+  </div>
+
+  <!-- اختيار الصوت -->
+  <div class="voice-picker">
+    <label>🎙️ اختر الصوت:</label>
+    <select id="voiceSelect" onchange="onVoiceChange()">
+      <option value="">جاري تحميل الأصوات...</option>
+    </select>
+    <div class="pitch-row">
+      <label style="color:#94a3b8;font-size:13px">طبقة الصوت:</label>
+      <input type="range" id="pitchRange" min="0.3" max="1.5" step="0.1" value="0.7" oninput="onPitchChange()">
+      <span class="pitch-value" id="pitchValue">0.7</span>
+    </div>
+    <div class="test-row">
+      <button class="test-btn" onclick="testVoice()">🔊 جرّب الصوت</button>
+    </div>
+    <div class="hint">
+      💡 اختر الصوت ثم اضغط "جرّب الصوت" حتى تجد الأنسب لك.
+      اخفض طبقة الصوت لجعله أكثر رجولة.
+    </div>
   </div>
 
   <div class="controls">
@@ -264,8 +324,11 @@
   let state = {
     stageIndex: 0,
     count: 0,
-    audioEnabled: true
+    audioEnabled: true,
+    selectedVoiceURI: null,
+    pitch: 0.7
   };
+  let availableVoices = [];
 
   // ============= الصوت =============
   let audioCtx = null;
@@ -318,19 +381,27 @@
       const u = new SpeechSynthesisUtterance(text);
       u.lang = "ar-SA";
       u.rate = 0.85;
-      u.pitch = 0.7;   // طبقة منخفضة = صوت رجل
+      u.pitch = state.pitch;   // طبقة منخفضة = صوت رجل
       u.volume = 1;
 
+      // 1) إذا اختار المستخدم صوتاً، نستخدمه
+      if(state.selectedVoiceURI){
+        const chosen = availableVoices.find(v => v.voiceURI === state.selectedVoiceURI);
+        if(chosen){
+          u.voice = chosen;
+          window.speechSynthesis.speak(u);
+          return;
+        }
+      }
+
+      // 2) خلاف ذلك: نختار تلقائياً صوتاً عربياً رجالياً
       const voices = window.speechSynthesis.getVoices();
-      // كلمات مفتاحية للأصوات الرجالية المعروفة
       const maleKeywords = [
         "male", "homme", "rajul", "majed", "naayf", "hamed", "tarik",
         "salim", "khaled", "majeed", "abdul", "masoud", "wael", "ali"
       ];
-      // كلمات مفتاحية لاستبعاد الأصوات النسائية
       const femaleKeywords = ["female", "femme", "woman", "amira", "sara", "laila", "nada", "zahra", "hala", "salma"];
 
-      // 1) نبحث عن صوت عربي رجالي صراحة
       let chosen = voices.find(v => {
         if(!v.lang || !v.lang.toLowerCase().startsWith("ar")) return false;
         const n = (v.name||"").toLowerCase();
@@ -338,7 +409,6 @@
         return maleKeywords.some(k => n.includes(k));
       });
 
-      // 2) إن لم نجد، نأخذ أي صوت عربي ليس فيه إشارة لأنه نسائي
       if(!chosen){
         chosen = voices.find(v => {
           if(!v.lang || !v.lang.toLowerCase().startsWith("ar")) return false;
@@ -347,7 +417,6 @@
         });
       }
 
-      // 3) آخر حلّ: أي صوت عربي
       if(!chosen){
         chosen = voices.find(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
       }
@@ -357,8 +426,84 @@
     }catch(e){}
   }
 
-  if("speechSynthesis" in window){
-    window.speechSynthesis.onvoiceschanged = ()=>{};
+  // ============= قائمة الأصوات =============
+  function loadVoiceList(){
+    const select = document.getElementById("voiceSelect");
+    if(!("speechSynthesis" in window)){
+      select.innerHTML = '<option value="">المتصفح لا يدعم الأصوات</option>';
+      return;
+    }
+
+    availableVoices = window.speechSynthesis.getVoices();
+    if(availableVoices.length === 0){
+      select.innerHTML = '<option value="">جاري تحميل الأصوات...</option>';
+      return;
+    }
+
+    // نضع الأصوات العربية أولاً
+    const arabic = availableVoices.filter(v => v.lang && v.lang.toLowerCase().startsWith("ar"));
+    const others = availableVoices.filter(v => v.lang && !v.lang.toLowerCase().startsWith("ar"));
+    const sorted = [...arabic, ...others];
+
+    select.innerHTML = "";
+
+    // خيار "تلقائي"
+    const autoOpt = document.createElement("option");
+    autoOpt.value = "";
+    autoOpt.textContent = "🤖 تلقائي (الأنسب)";
+    select.appendChild(autoOpt);
+
+    if(arabic.length > 0){
+      const arGroup = document.createElement("optgroup");
+      arGroup.label = "أصوات عربية";
+      arabic.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.voiceURI;
+        // محاولة كشف نوع الصوت من الاسم
+        const n = (v.name||"").toLowerCase();
+        let icon = "🎙️";
+        if(/female|amira|sara|laila|nada|zahra|hala|salma/.test(n)) icon = "👩";
+        else if(/male|majed|tarik|khaled|hamed|naayf|salim/.test(n)) icon = "👨";
+        opt.textContent = `${icon} ${v.name} (${v.lang})`;
+        arGroup.appendChild(opt);
+      });
+      select.appendChild(arGroup);
+    }
+
+    if(others.length > 0){
+      const otherGroup = document.createElement("optgroup");
+      otherGroup.label = "أصوات أخرى";
+      others.forEach(v => {
+        const opt = document.createElement("option");
+        opt.value = v.voiceURI;
+        opt.textContent = `${v.name} (${v.lang})`;
+        otherGroup.appendChild(opt);
+      });
+      select.appendChild(otherGroup);
+    }
+
+    // استعادة الاختيار المحفوظ
+    if(state.selectedVoiceURI){
+      select.value = state.selectedVoiceURI;
+    }
+  }
+
+  function onVoiceChange(){
+    const select = document.getElementById("voiceSelect");
+    state.selectedVoiceURI = select.value || null;
+    try{ localStorage.setItem("tasbihVoice", state.selectedVoiceURI || ""); }catch(e){}
+  }
+
+  function onPitchChange(){
+    const range = document.getElementById("pitchRange");
+    state.pitch = parseFloat(range.value);
+    document.getElementById("pitchValue").textContent = state.pitch.toFixed(1);
+    try{ localStorage.setItem("tasbihPitch", String(state.pitch)); }catch(e){}
+  }
+
+  function testVoice(){
+    ac();
+    speakDhikr("سبحان الله");
   }
 
   // ============= التحكم =============
@@ -503,7 +648,16 @@
       if(saved !== null){
         state.audioEnabled = saved === "1";
       }
+      const savedVoice = localStorage.getItem("tasbihVoice");
+      if(savedVoice) state.selectedVoiceURI = savedVoice;
+      const savedPitch = localStorage.getItem("tasbihPitch");
+      if(savedPitch){
+        state.pitch = parseFloat(savedPitch);
+        document.getElementById("pitchRange").value = state.pitch;
+        document.getElementById("pitchValue").textContent = state.pitch.toFixed(1);
+      }
     }catch(e){}
+
     // تطبيق حالة الصوت على الواجهة
     const toggle = document.getElementById("audioToggle");
     const status = document.getElementById("audioStatus");
@@ -513,6 +667,12 @@
     }else{
       status.textContent = "متوقف";
       toggle.querySelector(".icon").textContent = "🔇";
+    }
+
+    // تحميل قائمة الأصوات
+    loadVoiceList();
+    if("speechSynthesis" in window){
+      window.speechSynthesis.onvoiceschanged = loadVoiceList;
     }
   });
 
